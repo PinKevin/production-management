@@ -66,8 +66,17 @@ class ProductionOrderController extends Controller
         }
 
         $validated = $request->validated();
+        $productionOrder->logNotes = $validated['notes'] ?? null;
+        $productionOrder->status = $validated['status'];
 
-        $productionOrder->update($validated);
+        if (isset($validated['quantity_actual'])) {
+            $productionOrder->quantity_actual = $validated['quantity_actual'];
+        }
+        if (isset($validated['quantity_rejected'])) {
+            $productionOrder->quantity_rejected = $validated['quantity_rejected'];
+        }
+
+        $productionOrder->save();
 
         return ApiResponse::sendResponse(
             'Successfully updated plan',

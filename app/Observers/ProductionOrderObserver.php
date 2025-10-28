@@ -26,16 +26,29 @@ class ProductionOrderObserver
     /**
      * Handle the ProductionOrder "updated" event.
      */
-    public function updated(ProductionOrder $productionOrder): void
+    public function updating(ProductionOrder $productionOrder): void
     {
-        if ($productionOrder->wasChanged('status')) {
+        if ($productionOrder->isDirty('status')) {
             $originalStatus = $productionOrder->getOriginal('status')->value;
             $newStatus = $productionOrder->status->value;
+            $notes = $productionOrder->logNotes;
 
-            $notes = "Status diubah dari $originalStatus menjadi $newStatus.";
             if ($productionOrder->status === OrderStatus::COMPLETED) {
-                $notes = "Hasil jadi: $productionOrder->quantity_actual,
-                        hasil reject: $productionOrder->quantity_rejected";
+                $notes = "Hasil jadi: $productionOrder->quantity_actual, hasil reject: $productionOrder->quantity_rejected";
+
+                if (!empty($productionOrder->logNotes)) {
+                    $notes .= " Tambahan: " . $productionOrder->logNotes;
+                }
+            } else if ($productionOrder->status === OrderStatus::CANCELED) {
+                $notes = "Order dibatalkan";
+
+                if (!empty($productionOrder->logNotes)) {
+                    $notes .= " Alasan: " . $productionOrder->logNotes;
+                }
+            }
+
+            if (empty($notes)) {
+                $notes = "Status diubah dari $originalStatus menjadi $newStatus.";
             }
 
             ProductionLog::create([
@@ -45,6 +58,8 @@ class ProductionOrderObserver
                 'status_to' => $newStatus,
                 'notes' => $notes,
             ]);
+
+            unset($productionOrder->logNotes);
         }
     }
 

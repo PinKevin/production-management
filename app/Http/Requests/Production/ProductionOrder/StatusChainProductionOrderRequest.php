@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\RequiredIf;
+use Illuminate\Validation\Validator;
 
 class StatusChainProductionOrderRequest extends FormRequest
 {
@@ -27,18 +28,21 @@ class StatusChainProductionOrderRequest extends FormRequest
     {
         $currentOrder = $this->route('productionOrder');
         $currentStatus = $currentOrder?->status;
+        $quantityPlanned = $currentOrder?->quantity_planned ?? 0;
 
         return [
             'quantity_actual' => [
                 'integer',
-                'min:1',
+                'min:0',
+                "max:{$quantityPlanned}",
                 new RequiredIf(function () {
                     return $this->input('status') == OrderStatus::COMPLETED->value;
                 })
             ],
             'quantity_rejected' => [
                 'integer',
-                'min:1',
+                'min:0',
+                "max:{$quantityPlanned}",
                 new RequiredIf(function () {
                     return $this->input('status') == OrderStatus::COMPLETED->value;
                 })
@@ -46,7 +50,11 @@ class StatusChainProductionOrderRequest extends FormRequest
             'status' => [
                 'required',
                 new Enum(OrderStatus::class),
-                function (string $attribute, string $value, Closure $fail) use ($currentStatus) {
+                function (
+                    string $attribute,
+                    string $value,
+                    Closure $fail
+                ) use ($currentStatus) {
                     if (!$currentStatus) {
                         return;
                     }
@@ -59,7 +67,10 @@ class StatusChainProductionOrderRequest extends FormRequest
 
                     $allowedTransitions = match ($currentStatus) {
                         OrderStatus::WAITING => [OrderStatus::IN_PROGRESS],
-                        OrderStatus::IN_PROGRESS => [OrderStatus::COMPLETED, OrderStatus::CANCELED],
+                        OrderStatus::IN_PROGRESS => [
+                            OrderStatus::COMPLETED,
+                            OrderStatus::CANCELED
+                        ],
                         OrderStatus::COMPLETED, OrderStatus::CANCELED => [],
                         default => [],
                     };
@@ -69,6 +80,7 @@ class StatusChainProductionOrderRequest extends FormRequest
                     }
                 }
             ],
+            'notes' => 'max:500|string'
         ];
     }
 }
