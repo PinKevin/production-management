@@ -4,7 +4,7 @@ namespace App\Http\Requests\PPIC\ProductionPlan;
 
 use App\Enum\PlanStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rules\In;
 
 class UpdateProductionPlanRequest extends FormRequest
 {
@@ -27,6 +27,10 @@ class UpdateProductionPlanRequest extends FormRequest
             'quantity' => 'integer|min:1',
             'product_id' => 'integer|exists:products,id',
             'notes' => 'string',
+            'status' => new In([
+                PlanStatus::CREATED->value,
+                PlanStatus::NEEDS_APPROVAL->value
+            ])
         ];
     }
 }

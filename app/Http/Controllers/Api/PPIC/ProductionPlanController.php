@@ -43,10 +43,7 @@ class ProductionPlanController extends Controller
         }
 
         $input = $request->validated();
-        $plan = ProductionPlan::create([
-            ...$input,
-            'status' => PlanStatus::CREATED,
-        ]);
+        $plan = ProductionPlan::create($input);
         return ApiResponse::sendResponse(
             'Successfully created new plan',
             new ProductionPlanResource($plan),
@@ -81,7 +78,14 @@ class ProductionPlanController extends Controller
             abort(404);
         }
 
-        $validated = $request->safe()->only(['quantity', 'product_id', 'notes']);
+        $validated = $request
+            ->safe()
+            ->only([
+                'quantity',
+                'product_id',
+                'notes',
+                'status'
+            ]);
 
         $productionPlan->update($validated);
 
