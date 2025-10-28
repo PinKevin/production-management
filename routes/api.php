@@ -10,10 +10,21 @@ Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('/production-plans', ProductionPlanController::class);
-    Route::put('/production-plans/{productionPlan}/approve', [ProductionPlanController::class, 'approvePlan']);
+    Route::put(
+        '/production-plans/{productionPlan}/approve',
+        [ProductionPlanController::class, 'approvePlan']
+    );
     Route::get('/report/production-plans', [ProductionPlanController::class, 'makeReport']);
 
     Route::get('/production-orders', [ProductionOrderController::class, 'index']);
+    Route::get(
+        '/production-orders/{productionOrder}',
+        [ProductionOrderController::class, 'show']
+    );
+    Route::put(
+        '/production-orders/{productionOrder}/change-status',
+        [ProductionOrderController::class, 'changeStatus']
+    );
 });
 
 Route::get('/user', function (Request $request) {

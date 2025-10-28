@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductionLog extends Model
 {
+    public const UPDATED_AT = null;
+
     protected $fillable = [
         'user_id',
         'production_order_id',

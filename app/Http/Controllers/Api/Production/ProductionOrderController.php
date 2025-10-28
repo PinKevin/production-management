@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Production;
 
 use App\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Production\ProductionOrder\StatusChainProductionOrderRequest;
 use App\Http\Resources\Production\ProductionOrderResource;
 use App\Models\Production\ProductionOrder;
 use Illuminate\Http\Request;
@@ -39,17 +40,41 @@ class ProductionOrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ProductionOrder $productionOrder)
+    public function show(ProductionOrder $productionOrder, Request $request)
     {
-        //
+        if ($request->user()->cannot('view', $productionOrder)) {
+            abort(404);
+        }
+
+        return ApiResponse::sendResponse(
+            'Successfully fetch an order',
+            new ProductionOrderResource($productionOrder),
+            true,
+            200
+        );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ProductionOrder $productionOrder)
-    {
-        //
+    public function changeStatus(
+        StatusChainProductionOrderRequest $request,
+        ProductionOrder $productionOrder
+    ) {
+        if ($request->user()->cannot('update', $productionOrder)) {
+            abort(404);
+        }
+
+        $validated = $request->validated();
+
+        $productionOrder->update($validated);
+
+        return ApiResponse::sendResponse(
+            'Successfully updated plan',
+            new ProductionOrderResource($productionOrder),
+            true,
+            200
+        );
     }
 
     /**
