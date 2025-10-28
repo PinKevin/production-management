@@ -1,7 +1,10 @@
 <?php
 
+use App\Enum\UserDepartment;
+use App\Enum\UserRole;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,6 +18,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->enum('role', Arr::pluck(UserRole::cases(), 'value'));
+            $table->enum('department', Arr::pluck(UserDepartment::cases(), 'value'));
             $table->string('password');
             $table->timestamps();
         });

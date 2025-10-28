@@ -9,14 +9,19 @@ use App\Http\Requests\PPIC\ProductionPlan\StoreProductionPlanRequest;
 use App\Http\Requests\PPIC\ProductionPlan\UpdateProductionPlanRequest;
 use App\Models\PPIC\ProductionPlan;
 use App\Http\Resources\PPIC\ProductionPlanResource;
+use Illuminate\Http\Request;
 
 class ProductionPlanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->user()->cannot('viewAny', ProductionPlan::class)) {
+            abort(404);
+        }
+
         $plans = ProductionPlan::latest()->paginate(10);
         return ApiResponse::sendResponse(
             'Successfully fetched plans',
@@ -31,6 +36,10 @@ class ProductionPlanController extends Controller
      */
     public function store(StoreProductionPlanRequest $request)
     {
+        if ($request->user()->cannot('create', ProductionPlan::class)) {
+            abort(404);
+        }
+
         $input = $request->validated();
         $plan = ProductionPlan::create([
             ...$input,
@@ -47,8 +56,12 @@ class ProductionPlanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ProductionPlan $productionPlan)
+    public function show(ProductionPlan $productionPlan, Request $request)
     {
+        if ($request->user()->cannot('view', $productionPlan)) {
+            abort(404);
+        }
+
         return ApiResponse::sendResponse(
             'Successfully fetch a plan',
             new ProductionPlanResource($productionPlan),
@@ -62,6 +75,10 @@ class ProductionPlanController extends Controller
      */
     public function update(UpdateProductionPlanRequest $request, ProductionPlan $productionPlan)
     {
+        if ($request->user()->cannot('update', $productionPlan)) {
+            abort(404);
+        }
+
         $validated = $request->safe()->only(['quantity', 'product_id', 'notes']);
 
         $productionPlan->update($validated);
@@ -77,8 +94,12 @@ class ProductionPlanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProductionPlan $productionPlan)
+    public function destroy(ProductionPlan $productionPlan, Request $request)
     {
+        if ($request->user()->cannot('delete', $productionPlan)) {
+            abort(404);
+        }
+
         $productionPlan->delete();
 
         return ApiResponse::sendResponse(
