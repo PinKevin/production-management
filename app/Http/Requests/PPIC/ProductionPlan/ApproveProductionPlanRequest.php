@@ -35,6 +35,7 @@ class ApproveProductionPlanRequest extends FormRequest
             ],
             'deadline' => [
                 'date',
+                'date_format:Y-m-d',
                 new RequiredIf(function () {
                     return $this->input('status') === PlanStatus::APPROVED->value;
                 }),

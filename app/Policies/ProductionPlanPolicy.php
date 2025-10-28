@@ -65,6 +65,12 @@ class ProductionPlanPolicy
             && $user->department == UserDepartment::PRODUCTION);
     }
 
+    public function makeReport(User $user): bool
+    {
+        return ($user->role == UserRole::STAFF
+            && $user->department == UserDepartment::PPIC);
+    }
+
 
     // /**
     //  * Determine whether the user can restore the model.

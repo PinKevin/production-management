@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api\PPIC;
 
 use App\ApiResponse;
-use App\Enum\PlanStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PPIC\ProductionPlan\ApproveProductionPlanRequest;
 use App\Http\Requests\PPIC\ProductionPlan\StoreProductionPlanRequest;
 use App\Http\Requests\PPIC\ProductionPlan\UpdateProductionPlanRequest;
 use App\Models\PPIC\ProductionPlan;
 use App\Http\Resources\PPIC\ProductionPlanResource;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -42,8 +42,8 @@ class ProductionPlanController extends Controller
             abort(404);
         }
 
-        $input = $request->validated();
-        $plan = ProductionPlan::create($input);
+        $validated = $request->validated();
+        $plan = ProductionPlan::create($validated);
         return ApiResponse::sendResponse(
             'Successfully created new plan',
             new ProductionPlanResource($plan),
@@ -72,8 +72,10 @@ class ProductionPlanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductionPlanRequest $request, ProductionPlan $productionPlan)
-    {
+    public function update(
+        UpdateProductionPlanRequest $request,
+        ProductionPlan $productionPlan
+    ) {
         if ($request->user()->cannot('update', $productionPlan)) {
             abort(404);
         }
@@ -116,8 +118,10 @@ class ProductionPlanController extends Controller
         );
     }
 
-    public function approvePlan(ProductionPlan $productionPlan, ApproveProductionPlanRequest $request)
-    {
+    public function approvePlan(
+        ProductionPlan $productionPlan,
+        ApproveProductionPlanRequest $request
+    ) {
         if ($request->user()->cannot('approvePlan', $productionPlan)) {
             abort(404);
         }
@@ -140,5 +144,45 @@ class ProductionPlanController extends Controller
             true,
             200
         );
+    }
+
+    public function makeReport(Request $request)
+    {
+        if ($request->user()->cannot('makeReport', ProductionPlan::class)) {
+            abort(404);
+        }
+
+        $period = $request->input('period', 'weekly');
+        $dateInput = $request->input('date');
+
+        $date = Carbon::parse($dateInput);
+
+        if ($period == 'weekly') {
+            $startDate = $date->copy()->startOfWeek();
+            $endDate = $date->copy()->endOfWeek();
+        } else {
+            $startDate = $date->copy()->startOfMonth();
+            $endDate = $date->copy()->endOfMonth();
+        }
+
+        $startDateFormatted = $startDate->format('d-m-Y');
+        $endDateFormatted = $endDate->format('d-m-Y');
+
+        $plans = ProductionPlan::with('product')
+            ->whereBetween('created_at', [
+                $startDate->startOfDay(),
+                $endDate->endOfDay()
+            ])
+            ->latest()
+            ->get();
+
+        $data = [
+            'plans' => $plans,
+            'startDateFormatted' => $startDateFormatted,
+            'endDateFormatted' => $endDateFormatted
+        ];
+
+        $pdf = Pdf::loadView('reports.production_plan', $data);
+        return $pdf->stream("laporan-produksi-{$startDateFormatted}-{$endDateFormatted}.pdf");
     }
 }

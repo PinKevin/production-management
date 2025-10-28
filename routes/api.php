@@ -10,6 +10,7 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('/production-plans', ProductionPlanController::class);
     Route::put('/production-plans/{productionPlan}/approve', [ProductionPlanController::class, 'approvePlan']);
+    Route::get('/report/production-plans', [ProductionPlanController::class, 'makeReport']);
 });
 
 Route::get('/user', function (Request $request) {
