@@ -1,6 +1,7 @@
 <?php
 
 use App\ApiResponse;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,6 +26,17 @@ return Application::configure(basePath: dirname(__DIR__))
                     $e->errors(),
                     false,
                     422,
+                );
+            }
+        });
+
+        $exceptions->renderable(function (AuthenticationException $e, Request $request) {
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return ApiResponse::sendResponse(
+                    $e->getMessage(),
+                    [],
+                    false,
+                    401,
                 );
             }
         });
