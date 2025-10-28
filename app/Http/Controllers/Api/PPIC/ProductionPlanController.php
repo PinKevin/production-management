@@ -3,15 +3,20 @@
 namespace App\Http\Controllers\Api\PPIC;
 
 use App\ApiResponse;
+use App\Enum\OrderStatus;
+use App\Enum\PlanStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PPIC\ProductionPlan\ApproveProductionPlanRequest;
 use App\Http\Requests\PPIC\ProductionPlan\StoreProductionPlanRequest;
 use App\Http\Requests\PPIC\ProductionPlan\UpdateProductionPlanRequest;
 use App\Models\PPIC\ProductionPlan;
 use App\Http\Resources\PPIC\ProductionPlanResource;
+use App\Models\Production\ProductionOrder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductionPlanController extends Controller
 {
@@ -128,15 +133,38 @@ class ProductionPlanController extends Controller
 
         $validated = $request->validated();
 
-        $deadlineInput = $validated['deadline'] ?? null;
-        $deadline = $deadlineInput
-            ? Carbon::parse($deadlineInput)->setTime(16, 0, 0)
-            : now()->addDays(7)->setTime(16, 0, 0);
+        DB::beginTransaction();
+        try {
+            $deadlineInput = $validated['deadline'] ?? null;
+            $deadline = $deadlineInput
+                ? Carbon::parse($deadlineInput)->setTime(16, 0, 0)
+                : now()->addDays(7)->setTime(16, 0, 0);
 
-        $productionPlan->update([
-            ...$validated,
-            'deadline' => $deadline
-        ]);
+            $productionPlan->update([
+                ...$validated,
+                'deadline' => $deadline
+            ]);
+
+            if ($validated['status'] == PlanStatus::APPROVED->value) {
+                ProductionOrder::create([
+                    'product_id' => $productionPlan->product_id,
+                    'production_plan_id' => $productionPlan->id,
+                    'quantity_planned' => $productionPlan->quantity,
+                    'status' => OrderStatus::WAITING,
+                    'deadline' => $deadline,
+                ]);
+            }
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return ApiResponse::sendResponse(
+                'Failed to approve plan',
+                $e->getMessage(),
+                false,
+                500
+            );
+        }
 
         return ApiResponse::sendResponse(
             'Successfully approved plan',
