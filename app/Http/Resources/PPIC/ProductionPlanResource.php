@@ -19,6 +19,7 @@ class ProductionPlanResource extends JsonResource
             'quantity' => $this->quantity,
             'notes' => $this->note,
             'status' => $this->status,
+            'product_id' => $this->product_id
         ];
     }
 }

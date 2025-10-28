@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\PPIC;
 
 use App\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PPIC\ProductionPlan\StoreProductionPlanRequest;
+use App\Http\Requests\PPIC\ProductionPlan\UpdateProductionPlanRequest;
 use App\Models\PPIC\ProductionPlan;
-use App\Http\Requests\StoreProductionPlanRequest;
-use App\Http\Requests\UpdateProductionPlanRequest;
 use App\Http\Resources\PPIC\ProductionPlanResource;
 
 class ProductionPlanController extends Controller
@@ -30,7 +30,14 @@ class ProductionPlanController extends Controller
      */
     public function store(StoreProductionPlanRequest $request)
     {
-        //
+        $input = $request->validated();
+        $plan = ProductionPlan::create($input);
+        return ApiResponse::sendResponse(
+            'Successfully created new plan',
+            new ProductionPlanResource($plan),
+            true,
+            201
+        );
     }
 
     /**
