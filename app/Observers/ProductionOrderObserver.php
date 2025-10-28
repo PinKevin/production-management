@@ -34,7 +34,7 @@ class ProductionOrderObserver
 
             $notes = "Status diubah dari $originalStatus menjadi $newStatus.";
             if ($productionOrder->status === OrderStatus::COMPLETED) {
-                $notes = "Hasil jadi: $productionOrder->quantity_completed,
+                $notes = "Hasil jadi: $productionOrder->quantity_actual,
                         hasil reject: $productionOrder->quantity_rejected";
             }
 
