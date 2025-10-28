@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\PPIC;
 use App\ApiResponse;
 use App\Enum\PlanStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PPIC\ProductionPlan\ApproveProductionPlanRequest;
 use App\Http\Requests\PPIC\ProductionPlan\StoreProductionPlanRequest;
 use App\Http\Requests\PPIC\ProductionPlan\UpdateProductionPlanRequest;
 use App\Models\PPIC\ProductionPlan;
 use App\Http\Resources\PPIC\ProductionPlanResource;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ProductionPlanController extends Controller
@@ -105,6 +107,32 @@ class ProductionPlanController extends Controller
         return ApiResponse::sendResponse(
             'Successfully deleted plan',
             [],
+            true,
+            200
+        );
+    }
+
+    public function approvePlan(ProductionPlan $productionPlan, ApproveProductionPlanRequest $request)
+    {
+        if ($request->user()->cannot('approvePlan', $productionPlan)) {
+            abort(404);
+        }
+
+        $validated = $request->validated();
+
+        $deadlineInput = $validated['deadline'] ?? null;
+        $deadline = $deadlineInput
+            ? Carbon::parse($deadlineInput)->setTime(16, 0, 0)
+            : now()->addDays(7)->setTime(16, 0, 0);
+
+        $productionPlan->update([
+            ...$validated,
+            'deadline' => $deadline
+        ]);
+
+        return ApiResponse::sendResponse(
+            'Successfully approved plan',
+            new ProductionPlanResource($productionPlan),
             true,
             200
         );

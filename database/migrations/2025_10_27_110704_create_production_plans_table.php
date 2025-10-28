@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('production_plans', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
-            $table->integer('quantity');
             $table->enum('status', Arr::pluck(PlanStatus::cases(), 'value'));
+            $table->timestamp('deadline')->nullable();
+            $table->integer('quantity');
             $table->text('notes')->nullable();
             $table->timestamps();
 

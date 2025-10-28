@@ -17,7 +17,8 @@ class ProductionPlan extends Model
         'product_id',
         'quantity',
         'notes',
-        'status'
+        'status',
+        'deadline'
     ];
 
     protected $casts = [

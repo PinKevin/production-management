@@ -15,8 +15,10 @@ class ProductionPlanPolicy
      */
     public function viewAny(User $user): bool
     {
-        return ($user->role == UserRole::MANAGER && $user->department == UserDepartment::PRODUCTION)
-            || ($user->role == UserRole::STAFF && $user->department == UserDepartment::PPIC);
+        return ($user->role == UserRole::MANAGER
+            && $user->department == UserDepartment::PRODUCTION)
+            || ($user->role == UserRole::STAFF
+                && $user->department == UserDepartment::PPIC);
     }
 
     /**
@@ -24,8 +26,10 @@ class ProductionPlanPolicy
      */
     public function view(User $user): bool
     {
-        return ($user->role == UserRole::MANAGER && $user->department == UserDepartment::PRODUCTION)
-            || ($user->role == UserRole::STAFF && $user->department == UserDepartment::PPIC);
+        return ($user->role == UserRole::MANAGER
+            && $user->department == UserDepartment::PRODUCTION)
+            || ($user->role == UserRole::STAFF
+                && $user->department == UserDepartment::PPIC);
     }
 
     /**
@@ -33,7 +37,8 @@ class ProductionPlanPolicy
      */
     public function create(User $user): bool
     {
-        return ($user->role == UserRole::STAFF && $user->department == UserDepartment::PPIC);
+        return ($user->role == UserRole::STAFF
+            && $user->department == UserDepartment::PPIC);
     }
 
     /**
@@ -41,8 +46,8 @@ class ProductionPlanPolicy
      */
     public function update(User $user): bool
     {
-        return ($user->role == UserRole::MANAGER && $user->department == UserDepartment::PRODUCTION)
-            || ($user->role == UserRole::STAFF && $user->department == UserDepartment::PPIC);
+        return ($user->role == UserRole::STAFF
+            && $user->department == UserDepartment::PPIC);
     }
 
     /**
@@ -50,8 +55,16 @@ class ProductionPlanPolicy
      */
     public function delete(User $user): bool
     {
-        return ($user->role == UserRole::STAFF && $user->department == UserDepartment::PPIC);;
+        return ($user->role == UserRole::STAFF
+            && $user->department == UserDepartment::PPIC);
     }
+
+    public function approvePlan(User $user): bool
+    {
+        return ($user->role == UserRole::MANAGER
+            && $user->department == UserDepartment::PRODUCTION);
+    }
+
 
     // /**
     //  * Determine whether the user can restore the model.
