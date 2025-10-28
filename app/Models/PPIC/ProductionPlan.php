@@ -2,6 +2,7 @@
 
 namespace App\Models\PPIC;
 
+use App\Enum\PlanStatus;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,10 @@ class ProductionPlan extends Model
         'product_id',
         'quantity',
         'notes',
+    ];
+
+    protected $casts = [
+        'status' => PlanStatus::class,
     ];
 
     public function product(): BelongsTo
