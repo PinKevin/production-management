@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Enum\UserDepartment;
 use App\Enum\UserRole;
+use App\Models\Production\ProductionLog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -71,5 +73,10 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function productionLogs(): HasMany
+    {
+        return $this->hasMany(ProductionLog::class);
     }
 }
