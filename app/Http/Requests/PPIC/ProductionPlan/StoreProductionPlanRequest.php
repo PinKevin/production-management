@@ -27,7 +27,6 @@ class StoreProductionPlanRequest extends FormRequest
             'quantity' => 'required|integer|min:1',
             'product_id' => 'required|integer|exists:products,id',
             'notes' => 'string',
-            'status' => ['required', new Enum(PlanStatus::class)]
         ];
     }
 }

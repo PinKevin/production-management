@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\PPIC\ProductionPlan;
 
+use App\Enum\PlanStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateProductionPlanRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class UpdateProductionPlanRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +24,9 @@ class UpdateProductionPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'quantity' => 'integer|min:1',
+            'product_id' => 'integer|exists:products,id',
+            'notes' => 'string',
         ];
     }
 }

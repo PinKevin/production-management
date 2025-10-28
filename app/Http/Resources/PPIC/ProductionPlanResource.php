@@ -17,7 +17,7 @@ class ProductionPlanResource extends JsonResource
         return [
             'id' => $this->id,
             'quantity' => $this->quantity,
-            'notes' => $this->note,
+            'notes' => $this->notes,
             'status' => $this->status,
             'product_id' => $this->product_id
         ];
