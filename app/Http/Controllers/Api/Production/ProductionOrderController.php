@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Production\ProductionOrder\StatusChainProductionOrderRequest;
 use App\Http\Resources\Production\ProductionOrderResource;
 use App\Models\Production\ProductionOrder;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ProductionOrderController extends Controller
@@ -84,6 +86,63 @@ class ProductionOrderController extends Controller
             true,
             200
         );
+    }
+
+    public function makeReport(Request $request)
+    {
+        if ($request->user()->cannot('makeReport', ProductionOrder::class)) {
+            abort(404);
+        }
+
+        $orderId = $request->input('order-id');
+        if ($orderId) {
+            $order = ProductionOrder::with(['product', 'productionLogs.user'])
+                ->find($orderId);
+
+            if (!$order) {
+                abort(404);
+            }
+
+            $data = [
+                'order' => $order
+            ];
+
+            $pdf = Pdf::loadView('reports.production_order_single', $data);
+            return $pdf->stream("laporan-order-produksi-{$order->id}");
+        }
+
+        $period = $request->input('period', 'weekly');
+        $dateInput = $request->input('date');
+
+        $date = Carbon::parse($dateInput ?? now());
+
+        if ($period == 'weekly') {
+            $startDate = $date->copy()->startOfWeek();
+            $endDate = $date->copy()->endOfWeek();
+        } else {
+            $startDate = $date->copy()->startOfMonth();
+            $endDate = $date->copy()->endOfMonth();
+        }
+
+        $startDateFormatted = $startDate->format('d-m-Y');
+        $endDateFormatted = $endDate->format('d-m-Y');
+
+        $orders = ProductionOrder::with('product')
+            ->whereBetween('created_at', [
+                $startDate->startOfDay(),
+                $endDate->endOfDay()
+            ])
+            ->latest()
+            ->get();
+
+        $data = [
+            'orders' => $orders,
+            'startDateFormatted' => $startDateFormatted,
+            'endDateFormatted' => $endDateFormatted
+        ];
+
+        $pdf = Pdf::loadView('reports.production_order_periodic', $data);
+        return $pdf->stream("laporan-order-produksi-{$startDateFormatted}-{$endDateFormatted}");
     }
 
     /**

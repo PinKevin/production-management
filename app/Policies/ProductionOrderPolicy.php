@@ -42,6 +42,11 @@ class ProductionOrderPolicy
         return ($user->department == UserDepartment::PRODUCTION);
     }
 
+    public function makeReport(User $user)
+    {
+        return ($user->department == UserDepartment::PRODUCTION);
+    }
+
     /**
      * Determine whether the user can delete the model.
      */

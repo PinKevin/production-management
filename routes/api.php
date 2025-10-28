@@ -25,6 +25,7 @@ Route::middleware(['auth:api'])->group(function () {
         '/production-orders/{productionOrder}/change-status',
         [ProductionOrderController::class, 'changeStatus']
     );
+    Route::get('/report/production-orders', [ProductionOrderController::class, 'makeReport']);
 });
 
 Route::get('/user', function (Request $request) {

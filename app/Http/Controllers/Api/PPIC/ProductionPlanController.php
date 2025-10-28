@@ -183,7 +183,7 @@ class ProductionPlanController extends Controller
         $period = $request->input('period', 'weekly');
         $dateInput = $request->input('date');
 
-        $date = Carbon::parse($dateInput);
+        $date = Carbon::parse($dateInput ?? now());
 
         if ($period == 'weekly') {
             $startDate = $date->copy()->startOfWeek();
@@ -211,6 +211,6 @@ class ProductionPlanController extends Controller
         ];
 
         $pdf = Pdf::loadView('reports.production_plan', $data);
-        return $pdf->stream("laporan-produksi-{$startDateFormatted}-{$endDateFormatted}.pdf");
+        return $pdf->stream("laporan-rencana-produksi-{$startDateFormatted}-{$endDateFormatted}.pdf");
     }
 }

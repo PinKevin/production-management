@@ -67,8 +67,7 @@ class ProductionPlanPolicy
 
     public function makeReport(User $user): bool
     {
-        return ($user->role == UserRole::STAFF
-            && $user->department == UserDepartment::PPIC);
+        return ($user->department == UserDepartment::PPIC);
     }
 
 
