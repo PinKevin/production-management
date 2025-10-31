@@ -72,7 +72,11 @@
       <template v-else-if="data.length > 0">
         <TableRow v-for="(datum, index) in data" :key="datum.id">
           <TableCell>{{ meta ? meta.from + index : index + 1 }}.</TableCell>
-          <TableCell>{{ datum.product.name }}</TableCell>
+          <TableCell>
+            <RouterLink :to="`/production-plans/${datum.id}`">
+              {{ datum.product.name }}
+            </RouterLink>
+          </TableCell>
           <TableCell>{{ datum.quantity }}</TableCell>
           <TableCell>{{ formatDate(datum.createdAt) }}</TableCell>
           <TableCell>
@@ -80,11 +84,11 @@
               :class="
                 cn(
                   'font-semibold px-2 py-0.5 rounded-full text-xs',
-                  statusDisplayMap[datum.status]?.class || 'bg-gray-100 text-gray-700',
+                  planStatusDisplayMap[datum.status]?.class || 'bg-gray-100 text-gray-700',
                 )
               "
             >
-              {{ statusDisplayMap[datum.status]?.label || datum.status }}
+              {{ planStatusDisplayMap[datum.status]?.label || datum.status }}
             </span>
           </TableCell>
           <TableCell>Aksi</TableCell>
@@ -122,6 +126,7 @@ import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import AppPagination from '../AppPagination.vue';
 import { RouterLink } from 'vue-router';
+import { planStatusDisplayMap } from '@/helper/statusDisplayHelper';
 
 const props = defineProps<{
   pageTitle: string;
@@ -145,25 +150,6 @@ const statusOptions: { value: PlanStatus | 'ALL'; label: string }[] = [
   { value: PlanStatus.APPROVED, label: 'Disetujui' },
   { value: PlanStatus.DECLINED, label: 'Ditolak' },
 ];
-
-const statusDisplayMap: Record<PlanStatus, { label: string; class: string }> = {
-  [PlanStatus.CREATED]: {
-    label: 'Dibuat',
-    class: 'bg-gray-100 text-gray-700',
-  },
-  [PlanStatus.NEEDS_APPROVAL]: {
-    label: 'Menunggu Persetujuan',
-    class: 'bg-yellow-100 text-yellow-700',
-  },
-  [PlanStatus.APPROVED]: {
-    label: 'Disetujui',
-    class: 'bg-green-100 text-green-700',
-  },
-  [PlanStatus.DECLINED]: {
-    label: 'Ditolak',
-    class: 'bg-red-100 text-red-700',
-  },
-};
 
 const handleSort = (field: SortField) => {
   let newOrder: SortOrder | null = 'ASC';

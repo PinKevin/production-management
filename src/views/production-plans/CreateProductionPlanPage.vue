@@ -81,10 +81,6 @@ const productIdError = ref('');
 const quantityError = ref('');
 const notesError = ref('');
 
-// const emit = defineEmits<{
-//   (e: 'update:product', productId: number): void;
-// }>();
-
 const fetchProducts = async () => {
   const token = getToken();
   isLoading.value = true;

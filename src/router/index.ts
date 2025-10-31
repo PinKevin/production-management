@@ -6,6 +6,7 @@ import ProductionOrderPage from '@/views/ProductionOrderPage.vue';
 import CreateProductionPlanPage from '@/views/production-plans/CreateProductionPlanPage.vue';
 import ProductionPlanManagerPage from '@/views/production-plans/ProductionPlanManagerPage.vue';
 import ProductionPlanPage from '@/views/production-plans/ProductionPlanPage.vue';
+import ShowProductionPlanPage from '@/views/production-plans/ShowProductionPlanPage.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 function checkUserAccess(user: { department: string; role: string } | null, meta: any) {
@@ -48,6 +49,12 @@ const router = createRouter({
           path: 'production-plans/create',
           name: 'production-plans-ppic-create',
           component: CreateProductionPlanPage,
+          meta: { department: 'PPIC' },
+        },
+        {
+          path: 'production-plans/:id',
+          name: 'production-plans-ppic-create',
+          component: ShowProductionPlanPage,
           meta: { department: 'PPIC' },
         },
         {
