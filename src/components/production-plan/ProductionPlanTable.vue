@@ -138,19 +138,21 @@
     <AppPagination :meta="meta" @update:page="emit('update:page', $event)" />
   </div>
 
-  <DeleteDialog
+  <ConfirmDialog
     v-model:open="isDeleteDialogOpen"
     title="Konfirmasi Hapus Rencana"
     :description="`Yakin ingin menghapus rencana untuk produk '${planToDelete?.product.name}'? Aksi ini tidak dapat dibatalkan.`"
+    :is-destructive="true"
     @confirm="handleConfirmDelete"
   />
 
-  <SendToApproveDialog
+  <ConfirmDialog
     v-model:open="isSendDialogOpen"
     :title="actionType === 'send' ? 'Konfirmasi Pengajuan' : 'Batalkan Pengajuan'"
     :description="`Yakin ingin ${
       actionType === 'send' ? 'mengajukan' : 'membatalkan'
     } rencana untuk produk '${planToSend?.product.name}'?`"
+    :is-destructive="true"
     @confirm="handleApproval"
   />
 </template>
@@ -172,9 +174,8 @@ import AppPagination from '../AppPagination.vue';
 import { RouterLink } from 'vue-router';
 import { planStatusDisplayMap } from '@/helper/statusDisplayHelper';
 import { ref } from 'vue';
-import DeleteDialog from '../crud/DeleteDialog.vue';
-import SendToApproveDialog from './SendToApproveDialog.vue';
 import { formatDate } from '@/helper/formatDateHelper';
+import ConfirmDialog from '../crud/ConfirmDialog.vue';
 
 const props = defineProps<{
   pageTitle: string;

@@ -8,7 +8,12 @@
 
       <DialogFooter>
         <Button type="button" variant="outline" @click="emit('update:open', false)">Batal</Button>
-        <Button type="button" variant="default" @click="onConfirm">Ya</Button>
+        <Button
+          type="button"
+          :variant="isDestructive ? 'destructive' : 'default'"
+          @click="onConfirm"
+          >Ya</Button
+        >
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -29,6 +34,7 @@ defineProps<{
   open: boolean;
   title: string;
   description: string;
+  isDestructive?: boolean;
 }>();
 
 const emit = defineEmits<{

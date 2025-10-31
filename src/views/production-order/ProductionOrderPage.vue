@@ -9,6 +9,7 @@
     @update:sort="sortParams = $event"
     @update:filter="statusFilter = $event"
     @update:page="currentPage = $event"
+    @order:process="handleStatusChange($event, 'process')"
   />
 </template>
 
@@ -17,7 +18,7 @@ import { baseUrl } from '@/api/baseUrl';
 import ProductionOrderTable from '@/components/production-order/ProductionOrderTable.vue';
 import { getToken } from '@/helper/authHelper';
 import type { PaginationMeta, SortParams } from '@/interfaces/getAll.interface';
-import type { OrderStatus, ProductionOrder } from '@/interfaces/productionOrder.interface';
+import { OrderStatus, type ProductionOrder } from '@/interfaces/productionOrder.interface';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 
@@ -65,6 +66,52 @@ const fetchData = async () => {
   }
 };
 
+const handleStatusChange = async (
+  orderId: number,
+  action: 'process' | 'completed' | 'cancelled',
+) => {
+  const token = getToken();
+  isLoading.value = true;
+
+  let status;
+  if (action === 'process') {
+    status = OrderStatus.IN_PROGRESS;
+  } else if (action === 'completed') {
+    status = OrderStatus.COMPLETED;
+  } else {
+    status = OrderStatus.CANCELED;
+  }
+
+  try {
+    await axios.put(
+      `${baseUrl}/production-orders/${orderId}/change-status`,
+      {
+        status,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    await fetchData();
+  } catch (error: any) {
+    const status = error.response.status;
+
+    if (error.response) {
+      if (status === 401) {
+        console.error('Not authenticated.');
+      }
+    } else if (error.request) {
+      console.error('Cannot connect to server');
+    } else {
+      console.error('Something happened');
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
 onMounted(fetchData);
 
 watch(sortParams, fetchData, { deep: true });

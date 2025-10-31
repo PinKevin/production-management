@@ -84,10 +84,11 @@
     <AppPagination :meta="meta" @update:page="emit('update:page', $event)" />
   </div>
 
-  <DeleteDialog
+  <ConfirmDialog
     v-model:open="isDeclineDialogOpen"
     title="Konfirmasi Tolak Rencana"
     :description="`Yakin ingin menolak rencana untuk produk '${planToDecline?.product.name}'`"
+    :is-destructive="true"
     @confirm="handleConfirmDecline"
   />
 
@@ -114,9 +115,9 @@ import { Button } from '../ui/button';
 import AppPagination from '../AppPagination.vue';
 import { RouterLink } from 'vue-router';
 import { ref } from 'vue';
-import DeleteDialog from '../crud/DeleteDialog.vue';
 import ApproveDialog from './ApproveDialog.vue';
 import { formatDate } from '@/helper/formatDateHelper';
+import ConfirmDialog from '../crud/ConfirmDialog.vue';
 
 const props = defineProps<{
   pageTitle: string;

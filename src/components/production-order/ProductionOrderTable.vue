@@ -111,7 +111,20 @@
               {{ orderStatusDisplayMap[datum.status]?.label || datum.status }}
             </span>
           </TableCell>
-          <TableCell>Aksi</TableCell>
+          <TableCell>
+            <div
+              v-if="datum.status !== OrderStatus.COMPLETED && datum.status !== OrderStatus.CANCELED"
+              class="flex flex-row gap-2"
+            >
+              <Button
+                v-if="datum.status === OrderStatus.WAITING"
+                size="icon"
+                @click="openProcessDialog(datum)"
+              >
+                <Send class="text-white" />
+              </Button>
+            </div>
+          </TableCell>
         </TableRow>
       </template>
       <template v-else>
@@ -127,6 +140,13 @@
   <div v-if="meta" class="flex justify-between items-center pt-4 w-full">
     <AppPagination :meta="meta" @update:page="emit('update:page', $event)" />
   </div>
+
+  <ConfirmDialog
+    v-model:open="isProcessDialogOpen"
+    title="Konfirmasi Ubah Status"
+    :description="`Yakin ingin mengubah status produksi '${orderToProcessed?.product.name}' ke memproses?`"
+    @confirm="handleProcess"
+  />
 </template>
 
 <script setup lang="ts">
@@ -139,12 +159,14 @@ import type {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '../ui/table';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Send } from 'lucide-vue-next';
 import { Button } from '../ui/button';
 import AppPagination from '../AppPagination.vue';
 import { OrderStatus, type ProductionOrder } from '@/interfaces/productionOrder.interface';
 import { formatDate } from '@/helper/formatDateHelper';
 import { orderStatusDisplayMap } from '@/helper/statusDisplayHelper';
+import { ref } from 'vue';
+import ConfirmDialog from '../crud/ConfirmDialog.vue';
 
 const props = defineProps<{
   pageTitle: string;
@@ -159,7 +181,22 @@ const emit = defineEmits<{
   (e: 'update:sort', params: SortParams): void;
   (e: 'update:filter', status: OrderStatus | null): void;
   (e: 'update:page', page: number | null): void;
+  (e: 'order:process', orderId: number): void;
 }>();
+
+const isProcessDialogOpen = ref(false);
+const orderToProcessed = ref<ProductionOrder | null>(null);
+
+const openProcessDialog = (order: ProductionOrder) => {
+  orderToProcessed.value = order;
+  isProcessDialogOpen.value = true;
+};
+
+const handleProcess = () => {
+  if (orderToProcessed.value) {
+    emit('order:process', orderToProcessed.value.id);
+  }
+};
 
 const statusOptions: { value: OrderStatus | 'ALL'; label: string }[] = [
   { value: 'ALL', label: 'Semua' },

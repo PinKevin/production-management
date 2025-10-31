@@ -26,7 +26,7 @@ export const orderStatusDisplayMap: Record<OrderStatus, { label: string; class: 
     class: 'bg-gray-100 text-gray-700',
   },
   [OrderStatus.IN_PROGRESS]: {
-    label: 'Sedang Dikerjakan',
+    label: 'Diproses',
     class: 'bg-yellow-100 text-yellow-700',
   },
   [OrderStatus.COMPLETED]: {
