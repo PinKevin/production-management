@@ -16,6 +16,10 @@
           </SelectItem>
         </SelectContent>
       </Select>
+
+      <Button as-child>
+        <RouterLink to="/production-plans/create"> + Tambah </RouterLink>
+      </Button>
     </div>
   </div>
 
@@ -117,6 +121,7 @@ import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import AppPagination from '../AppPagination.vue';
+import { RouterLink } from 'vue-router';
 
 const props = defineProps<{
   pageTitle: string;

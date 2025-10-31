@@ -3,6 +3,7 @@ import MainLayout from '@/layouts/MainLayout.vue';
 import DashboardPage from '@/views/DashboardPage.vue';
 import LoginPage from '@/views/LoginPage.vue';
 import ProductionOrderPage from '@/views/ProductionOrderPage.vue';
+import CreateProductionPlanPage from '@/views/production-plans/CreateProductionPlanPage.vue';
 import ProductionPlanManagerPage from '@/views/production-plans/ProductionPlanManagerPage.vue';
 import ProductionPlanPage from '@/views/production-plans/ProductionPlanPage.vue';
 import { createRouter, createWebHistory } from 'vue-router';
@@ -41,6 +42,12 @@ const router = createRouter({
           path: 'production-plans',
           name: 'production-plans-ppic',
           component: ProductionPlanPage,
+          meta: { department: 'PPIC' },
+        },
+        {
+          path: 'production-plans/create',
+          name: 'production-plans-ppic-create',
+          component: CreateProductionPlanPage,
           meta: { department: 'PPIC' },
         },
         {

@@ -6,12 +6,12 @@
           <SidebarMenuButton size="lg" asChild>
             <RouterLink to="/">
               <div
-                className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
+                class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
               >
                 <GalleryVerticalEnd class="size-4" />
               </div>
-              <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-medium">Production Management</span>
+              <div class="flex flex-col gap-0.5 leading-none">
+                <span class="font-medium">Production Management</span>
               </div>
             </RouterLink>
           </SidebarMenuButton>
