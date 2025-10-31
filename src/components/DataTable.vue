@@ -1,0 +1,150 @@
+<template>
+  <div class="flex flex-row justify-between items-center">
+    <h1 class="mb-4 text-2xl font-bold">{{ pageTitle }}</h1>
+
+    <div class="flex flex-row gap-2">
+      <Select
+        :model-value="statusFilter ?? 'ALL'"
+        @update:model-value="(v) => onFilterChange(v as PlanStatus | 'ALL')"
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Filter berdasarkan status"> </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  </div>
+
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>No.</TableHead>
+        <TableHead>Produk</TableHead>
+        <TableHead>Jumlah</TableHead>
+        <TableHead>
+          <div class="flex items-center space-x-2">
+            <span>Dibuat Pada</span>
+            <Button variant="ghost" size="sm" @click="handleSort('created_at')" class="p-0 h-auto">
+              <ChevronUp
+                :class="
+                  cn(
+                    'w-4 h-4 transition-colors',
+                    sortParams.field === 'created_at' && sortParams.order === 'ASC'
+                      ? 'text-blue-600'
+                      : 'text-gray-400 hover:text-gray-700',
+                  )
+                "
+              />
+              <ChevronDown
+                :class="
+                  cn(
+                    'w-4 h-4 transition-colors',
+                    sortParams.field === 'created_at' && sortParams.order === 'DESC'
+                      ? 'text-blue-600'
+                      : 'text-gray-400 hover:text-gray-700',
+                  )
+                "
+              />
+            </Button>
+          </div>
+        </TableHead>
+        <TableHead>Status</TableHead>
+        <TableHead>Aksi</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      <template v-if="data.length > 0">
+        <TableRow v-for="(datum, index) in data" :key="datum.id">
+          <TableCell>{{ index + 1 }}</TableCell>
+          <TableCell>{{ datum.productId }}</TableCell>
+          <TableCell>{{ datum.quantity }}</TableCell>
+          <TableCell>{{ datum.createdAt }}</TableCell>
+          <TableCell>
+            <span
+              :class="
+                cn('font-semibold px-2 py-0.5 rounded-full text-xs', getStatusClass(datum.status))
+              "
+            >
+              {{ datum.status }}
+            </span>
+          </TableCell>
+          <TableCell>Aksi</TableCell>
+        </TableRow>
+      </template>
+    </TableBody>
+  </Table>
+</template>
+
+<script setup lang="ts">
+import { PlanStatus, type ProductionPlan } from '@/interfaces/productionPlan.interface';
+import type { SortField, SortOrder } from '@/interfaces/sortAndFilter.interface';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Table, TableBody, TableCell, TableHead, TableRow } from './ui/table';
+import TableHeader from './ui/table/TableHeader.vue';
+import { cn } from '@/lib/utils';
+import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { Button } from './ui/button';
+
+export interface SortParams {
+  field: SortField | null;
+  order: SortOrder | null;
+}
+
+const props = defineProps<{
+  pageTitle: string;
+  data: ProductionPlan[];
+  sortParams: SortParams;
+  statusFilter: PlanStatus | null;
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:sort', params: SortParams): void;
+  (e: 'update:filter', status: PlanStatus | null): void;
+}>();
+
+const statusOptions: { value: PlanStatus | 'ALL'; label: string }[] = [
+  { value: 'ALL', label: 'Semua' },
+  { value: PlanStatus.CREATED, label: 'Dibuat' },
+  { value: PlanStatus.NEEDS_APPROVAL, label: 'Menunggu Persetujuan' },
+  { value: PlanStatus.APPROVED, label: 'Disetujui' },
+  { value: PlanStatus.DECLINED, label: 'Ditolak' },
+];
+
+const handleSort = (field: SortField) => {
+  let newOrder: SortOrder | null = 'ASC';
+
+  if (props.sortParams.field === field) {
+    if (props.sortParams.order === 'ASC') {
+      newOrder = 'DESC';
+    } else if (props.sortParams.order === 'DESC') {
+      newOrder = 'ASC';
+    }
+  }
+
+  emit('update:sort', {
+    field: newOrder ? field : null,
+    order: newOrder,
+  });
+};
+
+const onFilterChange = (value: PlanStatus | 'ALL' | null) => {
+  if (value === 'ALL' || value === null) {
+    emit('update:filter', null);
+  } else {
+    emit('update:filter', value);
+  }
+};
+
+const getStatusClass = (status: PlanStatus) => {
+  return {
+    'bg-gray-100 text-gray-700': status === 'CREATED',
+    'bg-yellow-100 text-yellow-700': status === 'NEEDS_APPROVAL',
+    'bg-red-100 text-red-700': status === 'DECLINED',
+    'bg-green-100 text-green-700': status === 'APPROVED',
+  };
+};
+</script>
