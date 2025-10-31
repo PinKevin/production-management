@@ -6,7 +6,7 @@ export const planStatusDisplayMap: Record<PlanStatus, { label: string; class: st
     class: 'bg-gray-100 text-gray-700',
   },
   [PlanStatus.NEEDS_APPROVAL]: {
-    label: 'Menunggu Persetujuan',
+    label: 'Menunggu',
     class: 'bg-yellow-100 text-yellow-700',
   },
   [PlanStatus.APPROVED]: {

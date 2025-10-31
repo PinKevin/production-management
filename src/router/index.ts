@@ -4,6 +4,7 @@ import DashboardPage from '@/views/DashboardPage.vue';
 import LoginPage from '@/views/LoginPage.vue';
 import ProductionOrderPage from '@/views/ProductionOrderPage.vue';
 import CreateProductionPlanPage from '@/views/production-plans/CreateProductionPlanPage.vue';
+import EditProductionPlanPage from '@/views/production-plans/EditProductionPlanPage.vue';
 import ProductionPlanManagerPage from '@/views/production-plans/ProductionPlanManagerPage.vue';
 import ProductionPlanPage from '@/views/production-plans/ProductionPlanPage.vue';
 import ShowProductionPlanPage from '@/views/production-plans/ShowProductionPlanPage.vue';
@@ -53,8 +54,14 @@ const router = createRouter({
         },
         {
           path: 'production-plans/:id',
-          name: 'production-plans-ppic-create',
+          name: 'production-plans-ppic-show',
           component: ShowProductionPlanPage,
+          meta: { department: 'PPIC' },
+        },
+        {
+          path: 'production-plans/:id/edit',
+          name: 'production-plans-ppic-edit',
+          component: EditProductionPlanPage,
           meta: { department: 'PPIC' },
         },
         {

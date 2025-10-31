@@ -1,5 +1,5 @@
 <template>
-  <h2 class="mx-auto text-2xl font-bold">Tambah Rencana</h2>
+  <h2 class="mx-auto text-2xl font-bold">Ubah Rencana</h2>
   <form @submit.prevent="handleSubmit">
     <FieldGroup>
       <Field>
@@ -73,18 +73,22 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { getToken } from '@/helper/authHelper';
 import type { Product } from '@/interfaces/product.interface';
-import { PlanStatus } from '@/interfaces/productionPlan.interface';
+import type { ProductionPlan } from '@/interfaces/productionPlan.interface';
 import axios from 'axios';
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const productionPlan = ref<ProductionPlan | null>(null);
+const isLoading = ref(false);
 
 const products = ref<Product[]>([]);
-const isLoading = ref(false);
-const router = useRouter();
-
 const selectedProductId = ref<number>();
 const quantity = ref<number>();
 const notes = ref<string>('');
+
+const router = useRouter();
+const route = useRoute();
+const planId = route.params.id as string;
 
 const productIdError = ref('');
 const quantityError = ref('');
@@ -119,7 +123,49 @@ const fetchProducts = async () => {
   }
 };
 
-onMounted(fetchProducts);
+const fetchProductionPlan = async (id: string) => {
+  const token = getToken();
+  isLoading.value = true;
+
+  try {
+    const response = await axios.get(`${baseUrl}/production-plans/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    productionPlan.value = response.data.data;
+  } catch (error: any) {
+    const status = error.response.status;
+
+    if (error.response) {
+      if (status === 401) {
+        console.error('Not authenticated');
+      } else {
+        console.error('Server error');
+      }
+    } else {
+      console.error('Something happened');
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+watch(productionPlan, (newData) => {
+  if (newData) {
+    selectedProductId.value = newData.productId;
+    quantity.value = newData.quantity;
+    notes.value = newData.notes || '';
+  }
+});
+
+onMounted(() => {
+  if (planId) {
+    fetchProductionPlan(planId);
+    fetchProducts();
+  }
+});
 
 const handleSubmit = async () => {
   const token = getToken();
@@ -130,13 +176,12 @@ const handleSubmit = async () => {
   notesError.value = '';
 
   try {
-    await axios.post(
-      `${baseUrl}/production-plans`,
+    await axios.put(
+      `${baseUrl}/production-plans/${planId}`,
       {
         product_id: selectedProductId.value,
         quantity: quantity.value,
         notes: notes.value,
-        status: PlanStatus.CREATED,
       },
       {
         headers: {

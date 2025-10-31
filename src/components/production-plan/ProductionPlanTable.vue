@@ -91,7 +91,13 @@
               {{ planStatusDisplayMap[datum.status]?.label || datum.status }}
             </span>
           </TableCell>
-          <TableCell>Aksi</TableCell>
+          <TableCell>
+            <div class="flex flex-row gap-2">
+              <Button variant="secondary" class="h-7">
+                <RouterLink :to="`/production-plans/${datum.id}/edit`"> Ubah </RouterLink>
+              </Button>
+            </div>
+          </TableCell>
         </TableRow>
       </template>
       <template v-else>
