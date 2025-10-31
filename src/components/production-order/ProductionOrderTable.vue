@@ -141,10 +141,9 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '.
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { Button } from '../ui/button';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
 import AppPagination from '../AppPagination.vue';
 import { OrderStatus, type ProductionOrder } from '@/interfaces/productionOrder.interface';
+import { formatDate } from '@/helper/formatDateHelper';
 
 const props = defineProps<{
   pageTitle: string;
@@ -210,14 +209,6 @@ const onFilterChange = (value: OrderStatus | 'ALL' | null) => {
     emit('update:filter', null);
   } else {
     emit('update:filter', value);
-  }
-};
-
-const formatDate = (dateString: string) => {
-  try {
-    return format(new Date(dateString), 'dd MMMM yyyy', { locale: id });
-  } catch (e) {
-    return 'Tanggal Invalid';
   }
 };
 </script>

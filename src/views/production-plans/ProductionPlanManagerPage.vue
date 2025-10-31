@@ -6,9 +6,9 @@
     :is-loading="isLoading"
     :meta="meta"
     @update:sort="sortParams = $event"
-    @update:filter="statusFilter = $event"
     @update:page="currentPage = $event"
     @decline-plan="handleDecline"
+    @approve-plan="handleApprove"
   />
 </template>
 
@@ -25,7 +25,6 @@ const plans = ref<ProductionPlan[]>([]);
 const isLoading = ref(false);
 
 const sortParams = ref<SortParams>({ field: 'created_at', order: 'DESC' });
-const statusFilter = ref<PlanStatus | null>(null);
 const currentPage = ref<number | null>(1);
 const meta = ref<PaginationMeta | null>(null);
 
@@ -38,6 +37,42 @@ const handleDecline = async (planId: number) => {
       `${baseUrl}/production-plans/${planId}/approve`,
       {
         status: PlanStatus.DECLINED,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    await fetchData();
+  } catch (error: any) {
+    const status = error.response.status;
+
+    if (error.response) {
+      if (status === 401) {
+        console.error('Not authenticated.');
+      }
+    } else if (error.request) {
+      console.error('Cannot connect to server');
+    } else {
+      console.error('Something happened');
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleApprove = async (planId: number, deadline: string) => {
+  const token = getToken();
+  isLoading.value = true;
+
+  try {
+    await axios.put(
+      `${baseUrl}/production-plans/${planId}/approve`,
+      {
+        status: PlanStatus.APPROVED,
+        deadline,
       },
       {
         headers: {

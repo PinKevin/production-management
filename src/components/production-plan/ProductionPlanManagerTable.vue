@@ -63,7 +63,7 @@
               <Button size="icon" variant="destructive" @click="openDeclineDialog(datum)">
                 <X />
               </Button>
-              <Button size="icon">
+              <Button size="icon" @click="openApprovalDialog(datum)">
                 <Check />
               </Button>
             </div>
@@ -90,6 +90,13 @@
     :description="`Yakin ingin menolak rencana untuk produk '${planToDecline?.product.name}'`"
     @confirm="handleConfirmDecline"
   />
+
+  <ApproveDialog
+    v-model:open="isApprovalDialogOpen"
+    title="Setujui dan Tentukan Deadline"
+    description="Silakan pilih tanggal deadline untuk rencana produksi ini."
+    @confirm="handleConfirmApprove"
+  />
 </template>
 
 <script setup lang="ts">
@@ -104,12 +111,12 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '.
 import { cn } from '@/lib/utils';
 import { Check, ChevronDown, ChevronUp, X } from 'lucide-vue-next';
 import { Button } from '../ui/button';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
 import AppPagination from '../AppPagination.vue';
 import { RouterLink } from 'vue-router';
 import { ref } from 'vue';
 import DeleteDialog from '../crud/DeleteDialog.vue';
+import ApproveDialog from './ApproveDialog.vue';
+import { formatDate } from '@/helper/formatDateHelper';
 
 const props = defineProps<{
   pageTitle: string;
@@ -123,7 +130,7 @@ const emit = defineEmits<{
   (e: 'update:sort', params: SortParams): void;
   (e: 'update:page', page: number | null): void;
   (e: 'delete', planId: number): void;
-  (e: 'approvePlan', planId: number): void;
+  (e: 'approvePlan', planId: number, deadline: string): void;
   (e: 'declinePlan', planId: number): void;
 }>();
 
@@ -138,6 +145,20 @@ const openDeclineDialog = (plan: ProductionPlan) => {
 const handleConfirmDecline = () => {
   if (planToDecline.value) {
     emit('declinePlan', planToDecline.value.id);
+  }
+};
+
+const isApprovalDialogOpen = ref(false);
+const planToApproved = ref<ProductionPlan | null>(null);
+
+const openApprovalDialog = (plan: ProductionPlan) => {
+  planToApproved.value = plan;
+  isApprovalDialogOpen.value = true;
+};
+
+const handleConfirmApprove = (deadline: string) => {
+  if (planToApproved.value) {
+    emit('approvePlan', planToApproved.value.id, deadline);
   }
 };
 
@@ -156,13 +177,5 @@ const handleSort = (field: SortField) => {
     field: newOrder ? field : null,
     order: newOrder,
   });
-};
-
-const formatDate = (dateString: string) => {
-  try {
-    return format(new Date(dateString), 'dd MMMM yyyy', { locale: id });
-  } catch (e) {
-    return 'Tanggal Invalid';
-  }
 };
 </script>
