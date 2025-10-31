@@ -104,11 +104,11 @@
               :class="
                 cn(
                   'font-semibold px-2 py-0.5 rounded-full text-xs',
-                  statusDisplayMap[datum.status]?.class || 'bg-gray-100 text-gray-700',
+                  orderStatusDisplayMap[datum.status]?.class || 'bg-gray-100 text-gray-700',
                 )
               "
             >
-              {{ statusDisplayMap[datum.status]?.label || datum.status }}
+              {{ orderStatusDisplayMap[datum.status]?.label || datum.status }}
             </span>
           </TableCell>
           <TableCell>Aksi</TableCell>
@@ -144,6 +144,7 @@ import { Button } from '../ui/button';
 import AppPagination from '../AppPagination.vue';
 import { OrderStatus, type ProductionOrder } from '@/interfaces/productionOrder.interface';
 import { formatDate } from '@/helper/formatDateHelper';
+import { orderStatusDisplayMap } from '@/helper/statusDisplayHelper';
 
 const props = defineProps<{
   pageTitle: string;
@@ -162,30 +163,11 @@ const emit = defineEmits<{
 
 const statusOptions: { value: OrderStatus | 'ALL'; label: string }[] = [
   { value: 'ALL', label: 'Semua' },
-  { value: OrderStatus.WAITING, label: 'Menunggu' },
-  { value: OrderStatus.IN_PROGRESS, label: 'Sedang Dikerjakan' },
-  { value: OrderStatus.COMPLETED, label: 'Selesai' },
-  { value: OrderStatus.CANCELED, label: 'Dibatalkan' },
+  ...Object.entries(orderStatusDisplayMap).map(([key, value]) => ({
+    value: key as OrderStatus,
+    label: value.label,
+  })),
 ];
-
-const statusDisplayMap: Record<OrderStatus, { label: string; class: string }> = {
-  [OrderStatus.WAITING]: {
-    label: 'Menunggu',
-    class: 'bg-gray-100 text-gray-700',
-  },
-  [OrderStatus.IN_PROGRESS]: {
-    label: 'Sedang Dikerjakan',
-    class: 'bg-yellow-100 text-yellow-700',
-  },
-  [OrderStatus.COMPLETED]: {
-    label: 'Selesai',
-    class: 'bg-green-100 text-green-700',
-  },
-  [OrderStatus.CANCELED]: {
-    label: 'Dibatalkan',
-    class: 'bg-red-100 text-red-700',
-  },
-};
 
 const handleSort = (field: SortField) => {
   let newOrder: SortOrder | null = 'ASC';

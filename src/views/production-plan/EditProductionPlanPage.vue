@@ -48,7 +48,7 @@
       </Field>
 
       <Field>
-        <Button type="submit">Tambah</Button>
+        <Button type="submit">Ubah</Button>
       </Field>
     </FieldGroup>
   </form>

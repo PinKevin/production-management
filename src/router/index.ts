@@ -2,12 +2,13 @@ import { getToken, getUser } from '@/helper/authHelper';
 import MainLayout from '@/layouts/MainLayout.vue';
 import DashboardPage from '@/views/DashboardPage.vue';
 import LoginPage from '@/views/LoginPage.vue';
-import ProductionOrderPage from '@/views/ProductionOrderPage.vue';
-import CreateProductionPlanPage from '@/views/production-plans/CreateProductionPlanPage.vue';
-import EditProductionPlanPage from '@/views/production-plans/EditProductionPlanPage.vue';
-import ProductionPlanManagerPage from '@/views/production-plans/ProductionPlanManagerPage.vue';
-import ProductionPlanPage from '@/views/production-plans/ProductionPlanPage.vue';
-import ShowProductionPlanPage from '@/views/production-plans/ShowProductionPlanPage.vue';
+import ProductionOrderPage from '@/views/production-order/ProductionOrderPage.vue';
+import CreateProductionPlanPage from '@/views/production-plan/CreateProductionPlanPage.vue';
+import EditProductionPlanPage from '@/views/production-plan/EditProductionPlanPage.vue';
+import ProductionPlanManagerPage from '@/views/production-plan/ProductionPlanManagerPage.vue';
+import ProductionPlanPage from '@/views/production-plan/ProductionPlanPage.vue';
+import ShowProductionPlanPage from '@/views/production-plan/ShowProductionPlanPage.vue';
+
 import { createRouter, createWebHistory } from 'vue-router';
 
 function checkUserAccess(user: { department: string; role: string } | null, meta: any) {
