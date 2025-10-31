@@ -1,12 +1,14 @@
 <?php
 
 use App\ApiResponse;
+
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -49,6 +51,17 @@ return Application::configure(basePath: dirname(__DIR__))
                     [],
                     false,
                     404,
+                );
+            }
+        });
+
+        $exceptions->renderable(function (AccessDeniedHttpException $e, Request $request) {
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return ApiResponse::sendResponse(
+                    $e->getMessage(),
+                    [],
+                    false,
+                    403,
                 );
             }
         });

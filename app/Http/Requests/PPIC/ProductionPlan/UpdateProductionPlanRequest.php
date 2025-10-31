@@ -13,6 +13,16 @@ class UpdateProductionPlanRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        $plan = $this->route('production_plan');
+
+        if ($plan && !in_array($plan->status, [
+            PlanStatus::CREATED,
+            PlanStatus::NEEDS_APPROVAL,
+            PlanStatus::DECLINED
+        ])) {
+            return false;
+        }
+
         return true;
     }
 
@@ -24,13 +34,16 @@ class UpdateProductionPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'quantity' => 'integer|min:1',
-            'product_id' => 'integer|exists:products,id',
-            'notes' => 'string',
-            'status' => new In([
-                PlanStatus::CREATED->value,
-                PlanStatus::NEEDS_APPROVAL->value
-            ])
+            'quantity' => 'nullable|integer|min:1',
+            'product_id' => 'nullable|integer|exists:products,id',
+            'notes' => 'nullable|string',
+            'status' => [
+                'nullable',
+                new In([
+                    PlanStatus::CREATED->value,
+                    PlanStatus::NEEDS_APPROVAL->value
+                ])
+            ]
         ];
     }
 }

@@ -26,12 +26,11 @@ class StoreProductionPlanRequest extends FormRequest
         return [
             'quantity' => 'required|integer|min:1',
             'product_id' => 'required|integer|exists:products,id',
-            'notes' => 'string',
+            'notes' => 'nullable|string',
             'status' => [
                 'required',
                 new In([
                     PlanStatus::CREATED->value,
-                    PlanStatus::NEEDS_APPROVAL->value
                 ])
             ]
         ];

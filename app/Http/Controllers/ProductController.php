@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         if ($request->user()->cannot('create', ProductionPlan::class)) {
-            abort(404);
+            abort(403);
         }
 
         $products = Product::all();

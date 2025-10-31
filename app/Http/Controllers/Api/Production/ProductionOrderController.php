@@ -19,7 +19,7 @@ class ProductionOrderController extends Controller
     public function index(Request $request)
     {
         if ($request->user()->cannot('viewAny', ProductionOrder::class)) {
-            abort(404);
+            abort(403);
         }
 
         $status = $request->input('status');
@@ -65,7 +65,7 @@ class ProductionOrderController extends Controller
     public function show(ProductionOrder $productionOrder, Request $request)
     {
         if ($request->user()->cannot('view', $productionOrder)) {
-            abort(404);
+            abort(403);
         }
 
         return ApiResponse::sendResponse(
@@ -84,7 +84,7 @@ class ProductionOrderController extends Controller
         ProductionOrder $productionOrder
     ) {
         if ($request->user()->cannot('update', $productionOrder)) {
-            abort(404);
+            abort(403);
         }
 
         $validated = $request->validated();
@@ -111,7 +111,7 @@ class ProductionOrderController extends Controller
     public function makeReport(Request $request)
     {
         if ($request->user()->cannot('makeReport', ProductionOrder::class)) {
-            abort(404);
+            abort(403);
         }
 
         $orderId = $request->input('order-id');
@@ -120,7 +120,7 @@ class ProductionOrderController extends Controller
                 ->find($orderId);
 
             if (!$order) {
-                abort(404);
+                abort(403);
             }
 
             $data = [

@@ -26,7 +26,7 @@ class ProductionPlanController extends Controller
     public function index(Request $request)
     {
         if ($request->user()->cannot('viewAny', ProductionPlan::class)) {
-            abort(404);
+            abort(403);
         }
 
         $status = $request->input('status');
@@ -60,7 +60,7 @@ class ProductionPlanController extends Controller
     public function indexApproval(Request $request)
     {
         if ($request->user()->cannot('viewAnyForApproval', ProductionPlan::class)) {
-            abort(404);
+            abort(403);
         }
 
         $sortField = $request->input('sort-field');
@@ -95,7 +95,7 @@ class ProductionPlanController extends Controller
     public function store(StoreProductionPlanRequest $request)
     {
         if ($request->user()->cannot('create', ProductionPlan::class)) {
-            abort(404);
+            abort(403);
         }
 
         $validated = $request->validated();
@@ -114,8 +114,10 @@ class ProductionPlanController extends Controller
     public function show(ProductionPlan $productionPlan, Request $request)
     {
         if ($request->user()->cannot('view', $productionPlan)) {
-            abort(404);
+            abort(403);
         }
+
+        $productionPlan->load('product');
 
         return ApiResponse::sendResponse(
             'Successfully fetch a plan',
@@ -133,7 +135,7 @@ class ProductionPlanController extends Controller
         ProductionPlan $productionPlan
     ) {
         if ($request->user()->cannot('update', $productionPlan)) {
-            abort(404);
+            abort(403);
         }
 
         $validated = $request
@@ -161,7 +163,16 @@ class ProductionPlanController extends Controller
     public function destroy(ProductionPlan $productionPlan, Request $request)
     {
         if ($request->user()->cannot('delete', $productionPlan)) {
-            abort(404);
+            abort(403);
+        }
+
+        if ($productionPlan->status === PlanStatus::APPROVED) {
+            return ApiResponse::sendResponse(
+                "Can't delete data, plan already approved",
+                [],
+                false,
+                403
+            );
         }
 
         $productionPlan->delete();
@@ -179,7 +190,7 @@ class ProductionPlanController extends Controller
         ApproveProductionPlanRequest $request
     ) {
         if ($request->user()->cannot('approvePlan', $productionPlan)) {
-            abort(404);
+            abort(403);
         }
 
         $validated = $request->validated();
@@ -228,7 +239,7 @@ class ProductionPlanController extends Controller
     public function makeReport(Request $request)
     {
         if ($request->user()->cannot('makeReport', ProductionPlan::class)) {
-            abort(404);
+            abort(403);
         }
 
         $period = $request->input('period', 'weekly');
