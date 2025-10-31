@@ -1,3 +1,5 @@
+import type { Product } from './product.interface';
+
 export const enum PlanStatus {
   CREATED = 'CREATED',
   NEEDS_APPROVAL = 'NEEDS_APPROVAL',
@@ -8,9 +10,10 @@ export const enum PlanStatus {
 export interface ProductionPlan {
   id: number;
   status: PlanStatus;
-  deadline: string;
+  deadline: string | null;
   quantity: number;
-  notes: string;
+  notes: string | null;
   productId: number;
   createdAt: string;
+  product: Product;
 }

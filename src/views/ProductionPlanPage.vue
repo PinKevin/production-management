@@ -4,13 +4,16 @@
     :data="plans"
     :sort-params="sortParams"
     :status-filter="statusFilter"
+    :is-loading="isLoading"
+    @update:sort="sortParams = $event"
+    @update:filter="statusFilter = $event"
   />
 </template>
 
 <script setup lang="ts">
 import { baseUrl } from '@/api/baseUrl';
-import type { SortParams } from '@/components/DataTable.vue';
-import DataTable from '@/components/DataTable.vue';
+import type { SortParams } from '@/components/ProductionPlanTable.vue';
+import DataTable from '@/components/ProductionPlanTable.vue';
 import { getToken } from '@/helper/authHelper';
 import type { PlanStatus, ProductionPlan } from '@/interfaces/productionPlan.interface';
 import axios from 'axios';
@@ -30,6 +33,11 @@ const fetchData = async () => {
     const response = await axios.get(`${baseUrl}/production-plans`, {
       headers: {
         Authorization: `Bearer ${token}`,
+      },
+      params: {
+        status: statusFilter.value,
+        sortField: sortParams.value.field,
+        sortOrder: sortParams.value.order,
       },
     });
 
@@ -53,6 +61,6 @@ const fetchData = async () => {
 
 onMounted(fetchData);
 
-// watch(sortParams, fetchData, { deep: true });
-// watch(statusFilter, fetchData);
+watch(sortParams, fetchData, { deep: true });
+watch(statusFilter, fetchData);
 </script>

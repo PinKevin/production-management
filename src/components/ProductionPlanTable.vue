@@ -59,23 +59,34 @@
     <TableBody>
       <template v-if="data.length > 0">
         <TableRow v-for="(datum, index) in data" :key="datum.id">
-          <TableCell>{{ index + 1 }}</TableCell>
-          <TableCell>{{ datum.productId }}</TableCell>
+          <TableCell>{{ index + 1 }}.</TableCell>
+          <TableCell>{{ datum.product.name }}</TableCell>
           <TableCell>{{ datum.quantity }}</TableCell>
-          <TableCell>{{ datum.createdAt }}</TableCell>
+          <TableCell>{{ formatDate(datum.createdAt) }}</TableCell>
           <TableCell>
             <span
               :class="
-                cn('font-semibold px-2 py-0.5 rounded-full text-xs', getStatusClass(datum.status))
+                cn(
+                  'font-semibold px-2 py-0.5 rounded-full text-xs',
+                  statusDisplayMap[datum.status]?.class || 'bg-gray-100 text-gray-700',
+                )
               "
             >
-              {{ datum.status }}
+              {{ statusDisplayMap[datum.status]?.label || datum.status }}
             </span>
           </TableCell>
           <TableCell>Aksi</TableCell>
         </TableRow>
       </template>
+      <template v-else>
+        <TableRow>
+          <TableCell :colspan="6" class="text-center py-8 text-gray-500">
+            Belum ada data rencana produksi.
+          </TableCell>
+        </TableRow>
+      </template>
     </TableBody>
+    <TableFooter> </TableFooter>
   </Table>
 </template>
 
@@ -83,11 +94,13 @@
 import { PlanStatus, type ProductionPlan } from '@/interfaces/productionPlan.interface';
 import type { SortField, SortOrder } from '@/interfaces/sortAndFilter.interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Table, TableBody, TableCell, TableHead, TableRow } from './ui/table';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableRow } from './ui/table';
 import TableHeader from './ui/table/TableHeader.vue';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { Button } from './ui/button';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
 export interface SortParams {
   field: SortField | null;
@@ -99,6 +112,7 @@ const props = defineProps<{
   data: ProductionPlan[];
   sortParams: SortParams;
   statusFilter: PlanStatus | null;
+  isLoading: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -113,6 +127,25 @@ const statusOptions: { value: PlanStatus | 'ALL'; label: string }[] = [
   { value: PlanStatus.APPROVED, label: 'Disetujui' },
   { value: PlanStatus.DECLINED, label: 'Ditolak' },
 ];
+
+const statusDisplayMap: Record<PlanStatus, { label: string; class: string }> = {
+  [PlanStatus.CREATED]: {
+    label: 'Dibuat',
+    class: 'bg-gray-100 text-gray-700',
+  },
+  [PlanStatus.NEEDS_APPROVAL]: {
+    label: 'Menunggu Persetujuan',
+    class: 'bg-yellow-100 text-yellow-700',
+  },
+  [PlanStatus.APPROVED]: {
+    label: 'Disetujui',
+    class: 'bg-green-100 text-green-700',
+  },
+  [PlanStatus.DECLINED]: {
+    label: 'Ditolak',
+    class: 'bg-red-100 text-red-700',
+  },
+};
 
 const handleSort = (field: SortField) => {
   let newOrder: SortOrder | null = 'ASC';
@@ -139,12 +172,11 @@ const onFilterChange = (value: PlanStatus | 'ALL' | null) => {
   }
 };
 
-const getStatusClass = (status: PlanStatus) => {
-  return {
-    'bg-gray-100 text-gray-700': status === 'CREATED',
-    'bg-yellow-100 text-yellow-700': status === 'NEEDS_APPROVAL',
-    'bg-red-100 text-red-700': status === 'DECLINED',
-    'bg-green-100 text-green-700': status === 'APPROVED',
-  };
+const formatDate = (dateString: string) => {
+  try {
+    return format(new Date(dateString), 'dd MMMM yyyy', { locale: id });
+  } catch (e) {
+    return 'Tanggal Invalid';
+  }
 };
 </script>

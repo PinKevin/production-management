@@ -1,7 +1,7 @@
 import { getToken } from '@/helper/authHelper';
 import MainLayout from '@/layouts/MainLayout.vue';
 import LoginPage from '@/views/LoginPage.vue';
-import PlanPage from '@/views/PlanPage.vue';
+import PlanPage from '@/views/ProductionPlanPage.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
