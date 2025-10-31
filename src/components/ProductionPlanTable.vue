@@ -57,9 +57,17 @@
       </TableRow>
     </TableHeader>
     <TableBody>
-      <template v-if="data.length > 0">
+      <template v-if="isLoading">
+        <TableRow>
+          <TableCell :colspan="6" class="text-center py-8 text-gray-500">
+            Memuat data...
+          </TableCell>
+        </TableRow>
+      </template>
+
+      <template v-else-if="data.length > 0">
         <TableRow v-for="(datum, index) in data" :key="datum.id">
-          <TableCell>{{ index + 1 }}.</TableCell>
+          <TableCell>{{ meta ? meta.from + index : index + 1 }}.</TableCell>
           <TableCell>{{ datum.product.name }}</TableCell>
           <TableCell>{{ datum.quantity }}</TableCell>
           <TableCell>{{ formatDate(datum.createdAt) }}</TableCell>
@@ -86,26 +94,30 @@
         </TableRow>
       </template>
     </TableBody>
-    <TableFooter> </TableFooter>
   </Table>
+
+  <div v-if="meta" class="flex justify-between items-center pt-4 w-full">
+    <AppPagination :meta="meta" @update:page="emit('update:page', $event)" />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { PlanStatus, type ProductionPlan } from '@/interfaces/productionPlan.interface';
-import type { SortField, SortOrder } from '@/interfaces/sortAndFilter.interface';
+import type {
+  PaginationMeta,
+  SortField,
+  SortOrder,
+  SortParams,
+} from '@/interfaces/getAll.interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableRow } from './ui/table';
+import { Table, TableBody, TableCell, TableHead, TableRow } from './ui/table';
 import TableHeader from './ui/table/TableHeader.vue';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { Button } from './ui/button';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-
-export interface SortParams {
-  field: SortField | null;
-  order: SortOrder | null;
-}
+import AppPagination from './AppPagination.vue';
 
 const props = defineProps<{
   pageTitle: string;
@@ -113,11 +125,13 @@ const props = defineProps<{
   sortParams: SortParams;
   statusFilter: PlanStatus | null;
   isLoading: boolean;
+  meta: PaginationMeta | null;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:sort', params: SortParams): void;
   (e: 'update:filter', status: PlanStatus | null): void;
+  (e: 'update:page', page: number | null): void;
 }>();
 
 const statusOptions: { value: PlanStatus | 'ALL'; label: string }[] = [
