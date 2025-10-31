@@ -43,9 +43,7 @@
       </p>
     </template>
 
-    <Button as-child variant="secondary">
-      <RouterLink to="/production-plans" class="text-lg mt-3 max-w-20"> Kembali </RouterLink>
-    </Button>
+    <Button variant="secondary" class="max-w-20 mt-5" @click="router.back()"> Kembali </Button>
   </div>
 </template>
 
@@ -61,11 +59,12 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { onMounted, ref } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const productionPlan = ref<ProductionPlan | null>(null);
 const isLoading = ref(false);
 
+const router = useRouter();
 const route = useRoute();
 const planId = route.params.id as string;
 

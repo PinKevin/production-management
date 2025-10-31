@@ -12,19 +12,18 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 function checkUserAccess(user: { department: string; role: string } | null, meta: any) {
   if (!user) return false;
-  const { department, role } = meta;
+  const requiredAccessList = meta.roles as Array<{ department: string; role?: string }> | undefined;
 
-  if (!department) return true;
-
-  if (user.department !== department) {
-    return false;
+  if (!requiredAccessList || requiredAccessList.length === 0) {
+    return true;
   }
 
-  if (role && user.role !== role) {
-    return false;
-  }
+  return requiredAccessList.some((access) => {
+    const departmentMatch = user.department === access.department;
+    const roleMatch = !access.role || user.role === access.role;
 
-  return true;
+    return departmentMatch && roleMatch;
+  });
 }
 
 const router = createRouter({
@@ -44,37 +43,39 @@ const router = createRouter({
           path: 'production-plans',
           name: 'production-plans-ppic',
           component: ProductionPlanPage,
-          meta: { department: 'PPIC' },
+          meta: { roles: [{ department: 'PPIC' }] },
         },
         {
           path: 'production-plans/create',
           name: 'production-plans-ppic-create',
           component: CreateProductionPlanPage,
-          meta: { department: 'PPIC' },
+          meta: { roles: [{ department: 'PPIC' }] },
         },
         {
           path: 'production-plans/:id',
           name: 'production-plans-ppic-show',
           component: ShowProductionPlanPage,
-          meta: { department: 'PPIC' },
+          meta: {
+            roles: [{ department: 'PPIC' }, { department: 'PRODUCTION', role: 'MANAGER' }],
+          },
         },
         {
           path: 'production-plans/:id/edit',
           name: 'production-plans-ppic-edit',
           component: EditProductionPlanPage,
-          meta: { department: 'PPIC' },
+          meta: { roles: [{ department: 'PPIC' }] },
         },
         {
           path: '/approve/production-plans',
           name: 'production-plans-manager',
           component: ProductionPlanManagerPage,
-          meta: { department: 'PRODUCTION', role: 'MANAGER' },
+          meta: { roles: [{ department: 'PRODUCTION', role: 'MANAGER' }] },
         },
         {
           path: 'production-orders',
           name: 'production-orders',
           component: ProductionOrderPage,
-          meta: { department: 'PRODUCTION' },
+          meta: { roles: [{ department: 'PRODUCTION' }] },
         },
       ],
     },
