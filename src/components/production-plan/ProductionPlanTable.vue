@@ -92,16 +92,35 @@
             </span>
           </TableCell>
           <TableCell>
-            <div class="flex flex-row gap-2">
+            <div v-if="datum.status !== PlanStatus.APPROVED" class="flex flex-row gap-2">
+              <Button
+                v-if="datum.status === PlanStatus.CREATED"
+                size="icon"
+                @click="openSendDialog(datum, 'send')"
+              >
+                <Send class="text-white" />
+              </Button>
+
+              <Button
+                v-if="datum.status === PlanStatus.NEEDS_APPROVAL"
+                size="icon"
+                @click="openSendDialog(datum, 'revert')"
+              >
+                <Undo2 class="text-white" />
+              </Button>
+
               <Button variant="secondary" size="icon">
                 <RouterLink :to="`/production-plans/${datum.id}/edit`">
                   <Edit2 />
                 </RouterLink>
               </Button>
+
               <Button variant="destructive" size="icon" @click="openDeleteDialog(datum)">
                 <Trash2 class="text-white" />
               </Button>
             </div>
+
+            <div v-if="datum.status === PlanStatus.APPROVED">Rencana sudah disetujui</div>
           </TableCell>
         </TableRow>
       </template>
@@ -125,6 +144,15 @@
     :description="`Yakin ingin menghapus rencana untuk produk '${planToDelete?.product.name}'? Aksi ini tidak dapat dibatalkan.`"
     @confirm="handleConfirmDelete"
   />
+
+  <SendToApproveDialog
+    v-model:open="isSendDialogOpen"
+    :title="actionType === 'send' ? 'Konfirmasi Pengajuan' : 'Batalkan Pengajuan'"
+    :description="`Yakin ingin ${
+      actionType === 'send' ? 'mengajukan' : 'membatalkan'
+    } rencana untuk produk '${planToSend?.product.name}'?`"
+    @confirm="handleApproval"
+  />
 </template>
 
 <script setup lang="ts">
@@ -138,7 +166,7 @@ import type {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '../ui/table';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, Edit2, Trash2 } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Edit2, Send, Trash2, Undo2 } from 'lucide-vue-next';
 import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -147,6 +175,7 @@ import { RouterLink } from 'vue-router';
 import { planStatusDisplayMap } from '@/helper/statusDisplayHelper';
 import { ref } from 'vue';
 import DeleteDialog from '../crud/DeleteDialog.vue';
+import SendToApproveDialog from './SendToApproveDialog.vue';
 
 const props = defineProps<{
   pageTitle: string;
@@ -162,6 +191,8 @@ const emit = defineEmits<{
   (e: 'update:filter', status: PlanStatus | null): void;
   (e: 'update:page', page: number | null): void;
   (e: 'delete', planId: number): void;
+  (e: 'sendToApprove', planId: number): void;
+  (e: 'revertToCreated', planId: number): void;
 }>();
 
 const isDeleteDialogOpen = ref(false);
@@ -178,12 +209,30 @@ const handleConfirmDelete = () => {
   }
 };
 
+const isSendDialogOpen = ref(false);
+const planToSend = ref<ProductionPlan | null>(null);
+const actionType = ref<'send' | 'revert' | null>(null);
+
+const openSendDialog = (plan: ProductionPlan, action: 'send' | 'revert') => {
+  planToSend.value = plan;
+  actionType.value = action;
+  isSendDialogOpen.value = true;
+};
+
+const handleApproval = () => {
+  if (planToSend.value && actionType.value === 'send') {
+    emit('sendToApprove', planToSend.value.id);
+  } else if (planToSend.value && actionType.value === 'revert') {
+    emit('revertToCreated', planToSend.value.id);
+  }
+};
+
 const statusOptions: { value: PlanStatus | 'ALL'; label: string }[] = [
   { value: 'ALL', label: 'Semua' },
-  { value: PlanStatus.CREATED, label: 'Dibuat' },
-  { value: PlanStatus.NEEDS_APPROVAL, label: 'Menunggu Persetujuan' },
-  { value: PlanStatus.APPROVED, label: 'Disetujui' },
-  { value: PlanStatus.DECLINED, label: 'Ditolak' },
+  ...Object.entries(planStatusDisplayMap).map(([key, value]) => ({
+    value: key as PlanStatus,
+    label: value.label,
+  })),
 ];
 
 const handleSort = (field: SortField) => {

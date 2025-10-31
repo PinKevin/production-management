@@ -73,7 +73,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { getToken } from '@/helper/authHelper';
 import type { Product } from '@/interfaces/product.interface';
-import type { ProductionPlan } from '@/interfaces/productionPlan.interface';
+import { PlanStatus, type ProductionPlan } from '@/interfaces/productionPlan.interface';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -182,6 +182,7 @@ const handleSubmit = async () => {
         product_id: selectedProductId.value,
         quantity: quantity.value,
         notes: notes.value,
+        status: PlanStatus.CREATED,
       },
       {
         headers: {

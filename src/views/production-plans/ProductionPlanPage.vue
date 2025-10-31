@@ -10,6 +10,8 @@
     @update:filter="statusFilter = $event"
     @update:page="currentPage = $event"
     @delete="handleDelete"
+    @send-to-approve="handleApproval($event, 'send')"
+    @revert-to-created="handleApproval($event, 'revert')"
   />
 </template>
 
@@ -18,7 +20,7 @@ import { baseUrl } from '@/api/baseUrl';
 import ProductionPlanTable from '@/components/production-plan/ProductionPlanTable.vue';
 import { getToken } from '@/helper/authHelper';
 import type { PaginationMeta, SortParams } from '@/interfaces/getAll.interface';
-import type { PlanStatus, ProductionPlan } from '@/interfaces/productionPlan.interface';
+import { PlanStatus, type ProductionPlan } from '@/interfaces/productionPlan.interface';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 
@@ -58,6 +60,41 @@ const fetchData = async () => {
       } else {
         console.error('Server error');
       }
+    } else {
+      console.error('Something happened');
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleApproval = async (planId: number, action: 'send' | 'revert') => {
+  const token = getToken();
+  isLoading.value = true;
+
+  try {
+    await axios.put(
+      `${baseUrl}/production-plans/${planId}`,
+      {
+        status: action === 'send' ? PlanStatus.NEEDS_APPROVAL : PlanStatus.CREATED,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    await fetchData();
+  } catch (error: any) {
+    const status = error.response.status;
+
+    if (error.response) {
+      if (status === 401) {
+        console.error('Not authenticated.');
+      }
+    } else if (error.request) {
+      console.error('Cannot connect to server');
     } else {
       console.error('Something happened');
     }
