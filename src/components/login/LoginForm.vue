@@ -7,7 +7,7 @@ import { Label } from '../ui/label';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { baseUrl } from '@/api/baseUrl';
-import { setToken } from '@/helper/authTokenHelper';
+import { setToken, setUser } from '@/helper/authHelper';
 
 const email = ref('');
 const password = ref('');
@@ -32,6 +32,7 @@ const handleLogin = async () => {
     });
 
     setToken(response.data.data.token);
+    setUser(response.data.data.user);
 
     router.push('/production-plans');
   } catch (error: any) {
