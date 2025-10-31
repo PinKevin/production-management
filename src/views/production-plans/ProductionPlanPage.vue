@@ -9,6 +9,7 @@
     @update:sort="sortParams = $event"
     @update:filter="statusFilter = $event"
     @update:page="currentPage = $event"
+    @delete="handleDelete"
   />
 </template>
 
@@ -48,6 +49,35 @@ const fetchData = async () => {
 
     plans.value = response.data.data;
     meta.value = response.data.meta;
+  } catch (error: any) {
+    const status = error.response.status;
+
+    if (error.response) {
+      if (status === 401) {
+        console.error('Not authenticated');
+      } else {
+        console.error('Server error');
+      }
+    } else {
+      console.error('Something happened');
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleDelete = async (planId: number) => {
+  const token = getToken();
+  isLoading.value = true;
+
+  try {
+    await axios.delete(`${baseUrl}/production-plans/${planId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    await fetchData();
   } catch (error: any) {
     const status = error.response.status;
 

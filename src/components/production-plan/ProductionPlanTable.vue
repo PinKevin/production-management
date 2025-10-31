@@ -93,8 +93,13 @@
           </TableCell>
           <TableCell>
             <div class="flex flex-row gap-2">
-              <Button variant="secondary" class="h-7">
-                <RouterLink :to="`/production-plans/${datum.id}/edit`"> Ubah </RouterLink>
+              <Button variant="secondary" size="icon">
+                <RouterLink :to="`/production-plans/${datum.id}/edit`">
+                  <Edit2 />
+                </RouterLink>
+              </Button>
+              <Button variant="destructive" size="icon" @click="openDeleteDialog(datum)">
+                <Trash2 class="text-white" />
               </Button>
             </div>
           </TableCell>
@@ -113,6 +118,13 @@
   <div v-if="meta" class="flex justify-between items-center pt-4 w-full">
     <AppPagination :meta="meta" @update:page="emit('update:page', $event)" />
   </div>
+
+  <DeleteDialog
+    v-model:open="isDeleteDialogOpen"
+    title="Konfirmasi Hapus Rencana"
+    :description="`Yakin ingin menghapus rencana untuk produk '${planToDelete?.product.name}'? Aksi ini tidak dapat dibatalkan.`"
+    @confirm="handleConfirmDelete"
+  />
 </template>
 
 <script setup lang="ts">
@@ -126,13 +138,15 @@ import type {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '../ui/table';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Edit2, Trash2 } from 'lucide-vue-next';
 import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import AppPagination from '../AppPagination.vue';
 import { RouterLink } from 'vue-router';
 import { planStatusDisplayMap } from '@/helper/statusDisplayHelper';
+import { ref } from 'vue';
+import DeleteDialog from '../crud/DeleteDialog.vue';
 
 const props = defineProps<{
   pageTitle: string;
@@ -147,7 +161,22 @@ const emit = defineEmits<{
   (e: 'update:sort', params: SortParams): void;
   (e: 'update:filter', status: PlanStatus | null): void;
   (e: 'update:page', page: number | null): void;
+  (e: 'delete', planId: number): void;
 }>();
+
+const isDeleteDialogOpen = ref(false);
+const planToDelete = ref<ProductionPlan | null>(null);
+
+const openDeleteDialog = (plan: ProductionPlan) => {
+  planToDelete.value = plan;
+  isDeleteDialogOpen.value = true;
+};
+
+const handleConfirmDelete = () => {
+  if (planToDelete.value) {
+    emit('delete', planToDelete.value.id);
+  }
+};
 
 const statusOptions: { value: PlanStatus | 'ALL'; label: string }[] = [
   { value: 'ALL', label: 'Semua' },
