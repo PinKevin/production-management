@@ -3,18 +3,23 @@
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\PPIC\ProductionPlanController;
 use App\Http\Controllers\Api\Production\ProductionOrderController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware(['auth:api'])->group(function () {
+    Route::get('/products', [ProductController::class, 'index']);
+
     Route::apiResource('/production-plans', ProductionPlanController::class);
     Route::put(
         '/production-plans/{productionPlan}/approve',
         [ProductionPlanController::class, 'approvePlan']
     );
     Route::get('/report/production-plans', [ProductionPlanController::class, 'makeReport']);
+
+    Route::get('/approve/production-plans', [ProductionPlanController::class, 'indexApproval']);
 
     Route::get('/production-orders', [ProductionOrderController::class, 'index']);
     Route::get(

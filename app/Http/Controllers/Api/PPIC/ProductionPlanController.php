@@ -57,6 +57,38 @@ class ProductionPlanController extends Controller
         );
     }
 
+    public function indexApproval(Request $request)
+    {
+        if ($request->user()->cannot('viewAnyForApproval', ProductionPlan::class)) {
+            abort(404);
+        }
+
+        $sortField = $request->input('sort-field');
+        $sortOrder = $request->input('sort-order', 'desc');
+
+        $query = ProductionPlan::with('product')
+            ->where('status', PlanStatus::NEEDS_APPROVAL);
+
+        if ($sortField) {
+            if (!in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $sortOrder = 'desc';
+            }
+            $query->orderBy($sortField, $sortOrder);
+        } else {
+            $query->latest();
+        }
+
+        $plans = $query->paginate(10);
+
+        return ApiResponse::sendResponse(
+            'Successfully fetched plans',
+            ProductionPlanResource::collection($plans),
+            true,
+            200
+        );
+    }
+
+
     /**
      * Store a newly created resource in storage.
      */

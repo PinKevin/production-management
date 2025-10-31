@@ -22,10 +22,30 @@ class ProductionOrderController extends Controller
             abort(404);
         }
 
-        $plans = ProductionOrder::latest()->paginate(10);
+        $status = $request->input('status');
+        $sortField = $request->input('sort-field');
+        $sortOrder = $request->input('sort-order', 'desc');
+
+        $query = ProductionOrder::with('product');
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($sortField) {
+            if (!in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $sortOrder = 'desc';
+            }
+            $query->orderBy($sortField, $sortOrder);
+        } else {
+            $query->latest();
+        }
+
+
+        $orders = $query->paginate(10);
+
         return ApiResponse::sendResponse(
             'Successfully fetched orders',
-            ProductionOrderResource::collection($plans),
+            ProductionOrderResource::collection($orders),
             true,
             200
         );

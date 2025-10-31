@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Production;
 
+use App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,7 +22,9 @@ class ProductionOrderResource extends JsonResource
             'quantityActual' => $this->quantity_actual,
             'quantityRejected' => $this->quantity_rejected,
             'status' => $this->status,
-            'deadline' => $this->deadline
+            'deadline' => $this->deadline,
+            'createdAt' => $this->created_at,
+            'product' => new ProductResource($this->whenLoaded('product'))
         ];
     }
 }

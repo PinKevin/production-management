@@ -15,10 +15,14 @@ class ProductionPlanPolicy
      */
     public function viewAny(User $user): bool
     {
+        return ($user->role == UserRole::STAFF
+            && $user->department == UserDepartment::PPIC);
+    }
+
+    public function viewAnyForApproval(User $user): bool
+    {
         return ($user->role == UserRole::MANAGER
-            && $user->department == UserDepartment::PRODUCTION)
-            || ($user->role == UserRole::STAFF
-                && $user->department == UserDepartment::PPIC);
+            && $user->department == UserDepartment::PRODUCTION);
     }
 
     /**
