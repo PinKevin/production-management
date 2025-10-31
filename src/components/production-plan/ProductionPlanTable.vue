@@ -109,15 +109,14 @@ import type {
   SortOrder,
   SortParams,
 } from '@/interfaces/getAll.interface';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Table, TableBody, TableCell, TableHead, TableRow } from './ui/table';
-import TableHeader from './ui/table/TableHeader.vue';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '../ui/table';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import AppPagination from './AppPagination.vue';
+import AppPagination from '../AppPagination.vue';
 
 const props = defineProps<{
   pageTitle: string;

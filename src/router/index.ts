@@ -1,7 +1,8 @@
 import { getToken } from '@/helper/authHelper';
 import MainLayout from '@/layouts/MainLayout.vue';
 import LoginPage from '@/views/LoginPage.vue';
-import PlanPage from '@/views/ProductionPlanPage.vue';
+import ProductionOrderPage from '@/views/ProductionOrderPage.vue';
+import ProductionPlanPage from '@/views/ProductionPlanPage.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -14,7 +15,12 @@ const router = createRouter({
         {
           path: 'production-plans',
           name: 'production-plans',
-          component: PlanPage,
+          component: ProductionPlanPage,
+        },
+        {
+          path: 'production-orders',
+          name: 'production-orders',
+          component: ProductionOrderPage,
         },
       ],
     },

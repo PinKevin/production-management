@@ -1,6 +1,6 @@
 <template>
-  <ProductionPlanTable
-    :page-title="'Rencana Produksi'"
+  <ProductionOrderTable
+    :page-title="'Order Produksi'"
     :data="plans"
     :sort-params="sortParams"
     :status-filter="statusFilter"
@@ -14,18 +14,18 @@
 
 <script setup lang="ts">
 import { baseUrl } from '@/api/baseUrl';
-import ProductionPlanTable from '@/components/production-plan/ProductionPlanTable.vue';
+import ProductionOrderTable from '@/components/production-order/ProductionOrderTable.vue';
 import { getToken } from '@/helper/authHelper';
 import type { PaginationMeta, SortParams } from '@/interfaces/getAll.interface';
-import type { PlanStatus, ProductionPlan } from '@/interfaces/productionPlan.interface';
+import type { OrderStatus, ProductionOrder } from '@/interfaces/productionOrder.interface';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 
-const plans = ref<ProductionPlan[]>([]);
+const plans = ref<ProductionOrder[]>([]);
 const isLoading = ref(false);
 
-const sortParams = ref<SortParams>({ field: 'created_at', order: 'DESC' });
-const statusFilter = ref<PlanStatus | null>(null);
+const sortParams = ref<SortParams>({ field: 'deadline', order: 'ASC' });
+const statusFilter = ref<OrderStatus | null>(null);
 const currentPage = ref<number | null>(1);
 const meta = ref<PaginationMeta | null>(null);
 
@@ -34,7 +34,7 @@ const fetchData = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.get(`${baseUrl}/production-plans`, {
+    const response = await axios.get(`${baseUrl}/production-orders`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
