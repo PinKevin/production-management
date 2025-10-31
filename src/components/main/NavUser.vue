@@ -49,7 +49,7 @@ import type { User } from '@/interfaces/user.interface';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '../ui/sidebar';
-import { getUser, removeToken } from '@/helper/authHelper';
+import { clearAuthData, getUser, removeToken } from '@/helper/authHelper';
 import { Skeleton } from '../ui/skeleton';
 import {
   DropdownMenu,
@@ -87,7 +87,7 @@ onMounted(() => {
 });
 
 const handleLogout = () => {
-  removeToken();
+  clearAuthData();
   router.push('/login');
 };
 </script>

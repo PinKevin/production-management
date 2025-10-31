@@ -4,7 +4,7 @@
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" asChild>
-            <a href="/production-plans">
+            <RouterLink to="/">
               <div
                 className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
               >
@@ -13,7 +13,7 @@
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-medium">Production Management</span>
               </div>
-            </a>
+            </RouterLink>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -21,10 +21,10 @@
     <SidebarContent>
       <SidebarMenu>
         <SidebarMenuItem v-for="link in nav" :key="link.title">
-          <SidebarMenuButton asChild>
-            <a :href="link.url">
+          <SidebarMenuButton as-child>
+            <RouterLink :to="link.url">
               {{ link.title }}
-            </a>
+            </RouterLink>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -47,18 +47,53 @@ import {
   SidebarMenuItem,
 } from '../ui/sidebar';
 import NavUser from './NavUser.vue';
+import { computed, onMounted, ref } from 'vue';
+import type { User } from '@/interfaces/user.interface';
+import { getUser } from '@/helper/authHelper';
+import { RouterLink } from 'vue-router';
 
-SidebarContent;
-SidebarFooter;
+const user = ref<User | null>(null);
 
-const nav = [
-  {
-    title: 'Production Plan',
-    url: '/production-plans',
-  },
-  {
-    title: 'Production Order',
-    url: '/production-orders',
-  },
-];
+onMounted(() => {
+  user.value = getUser();
+});
+
+const isPpic = computed(() => user.value?.department === 'PPIC');
+const isProdManager = computed(
+  () => user.value?.department === 'PRODUCTION' && user.value?.role === 'MANAGER',
+);
+const isProdStaff = computed(
+  () => user.value?.department === 'PRODUCTION' && user.value?.role === 'STAFF',
+);
+
+const nav = computed(() => {
+  const ppic = isPpic.value;
+  const prodManager = isProdManager.value;
+  const prodStaff = isProdStaff.value;
+
+  const allLinks = [
+    {
+      title: 'Dashboard',
+      url: '/',
+      canView: true,
+    },
+    {
+      title: 'Production Plan',
+      url: '/production-plans',
+      canView: ppic,
+    },
+    {
+      title: 'Production Plan',
+      url: '/approve/production-plans',
+      canView: prodManager,
+    },
+    {
+      title: 'Production Order',
+      url: '/production-orders',
+      canView: prodStaff || prodManager,
+    },
+  ];
+
+  return allLinks.filter((link) => link.canView);
+});
 </script>

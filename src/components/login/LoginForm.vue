@@ -34,7 +34,7 @@ const handleLogin = async () => {
     setToken(response.data.data.token);
     setUser(response.data.data.user);
 
-    router.push('/production-plans');
+    router.push('/');
   } catch (error: any) {
     const status = error.response.status;
     const data = error.response.data;
