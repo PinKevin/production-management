@@ -29,7 +29,26 @@ class ProductionPlanController extends Controller
             abort(404);
         }
 
-        $plans = ProductionPlan::latest()->paginate(10);
+        $status = $request->input('status');
+        $sortField = $request->input('sort-field');
+        $sortOrder = $request->input('sort-order', 'desc');
+
+        $query = ProductionPlan::with('product');
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($sortField) {
+            if (!in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+                $sortOrder = 'desc';
+            }
+            $query->orderBy($sortField, $sortOrder);
+        } else {
+            $query->latest();
+        }
+
+        $plans = $query->paginate(10);
+
         return ApiResponse::sendResponse(
             'Successfully fetched plans',
             ProductionPlanResource::collection($plans),

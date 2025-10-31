@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\PPIC;
 
+use App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,7 +21,9 @@ class ProductionPlanResource extends JsonResource
             'deadline' => $this->deadline,
             'quantity' => $this->quantity,
             'notes' => $this->notes,
-            'product_id' => $this->product_id
+            'productId' => $this->product_id,
+            'createdAt' => $this->created_at,
+            'product' => new ProductResource($this->whenLoaded('product'))
         ];
     }
 }
