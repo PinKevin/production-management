@@ -3,6 +3,7 @@ import MainLayout from '@/layouts/MainLayout.vue';
 import DashboardPage from '@/views/DashboardPage.vue';
 import LoginPage from '@/views/LoginPage.vue';
 import ProductionOrderPage from '@/views/production-order/ProductionOrderPage.vue';
+import ShowProductionOrderPage from '@/views/production-order/ShowProductionOrderPage.vue';
 import CreateProductionPlanPage from '@/views/production-plan/CreateProductionPlanPage.vue';
 import EditProductionPlanPage from '@/views/production-plan/EditProductionPlanPage.vue';
 import ProductionPlanManagerPage from '@/views/production-plan/ProductionPlanManagerPage.vue';
@@ -76,6 +77,12 @@ const router = createRouter({
           path: 'production-orders',
           name: 'production-orders',
           component: ProductionOrderPage,
+          meta: { roles: [{ department: 'PRODUCTION' }] },
+        },
+        {
+          path: 'production-orders/:id',
+          name: 'production-orders-show',
+          component: ShowProductionOrderPage,
           meta: { roles: [{ department: 'PRODUCTION' }] },
         },
       ],

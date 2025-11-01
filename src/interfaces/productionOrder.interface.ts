@@ -1,4 +1,5 @@
 import type { Product } from './product.interface';
+import type { ProductionLog } from './productionLog.interface';
 
 export const enum OrderStatus {
   WAITING = 'WAITING',
@@ -17,4 +18,5 @@ export interface ProductionOrder {
   deadline: string;
   createdAt: string;
   product: Product;
+  productionLogs?: ProductionLog[];
 }

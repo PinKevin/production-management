@@ -95,7 +95,11 @@
       <template v-else-if="data.length > 0">
         <TableRow v-for="(datum, index) in data" :key="datum.id">
           <TableCell>{{ meta ? meta.from + index : index + 1 }}.</TableCell>
-          <TableCell>{{ datum.product.name }}</TableCell>
+          <TableCell>
+            <RouterLink :to="`/production-orders/${datum.id}`">
+              {{ datum.product.name }}
+            </RouterLink>
+          </TableCell>
           <TableCell>{{ datum.quantityPlanned }}</TableCell>
           <TableCell>{{ formatDate(datum.deadline) }}</TableCell>
           <TableCell>{{ formatDate(datum.createdAt) }}</TableCell>
