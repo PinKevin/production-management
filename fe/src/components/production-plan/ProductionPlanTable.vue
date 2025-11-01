@@ -17,6 +17,11 @@
         </SelectContent>
       </Select>
 
+      <Button variant="outline" @click="isReportDialogOpen = true">
+        <Printer class="mr-2 h-4 w-4" />
+        Cetak
+      </Button>
+
       <Button as-child>
         <RouterLink to="/production-plans/create"> + Tambah </RouterLink>
       </Button>
@@ -155,6 +160,8 @@
     :is-destructive="true"
     @confirm="handleApproval"
   />
+
+  <ReportPlanDialog v-model:open="isReportDialogOpen" @confirm="emit('report', $event)" />
 </template>
 
 <script setup lang="ts">
@@ -168,7 +175,7 @@ import type {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '../ui/table';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, Edit2, Send, Trash2, Undo2 } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Edit2, Printer, Send, Trash2, Undo2 } from 'lucide-vue-next';
 import { Button } from '../ui/button';
 import AppPagination from '../AppPagination.vue';
 import { RouterLink } from 'vue-router';
@@ -176,6 +183,8 @@ import { planStatusDisplayMap } from '@/helper/statusDisplayHelper';
 import { ref } from 'vue';
 import { formatDate } from '@/helper/formatDateHelper';
 import ConfirmDialog from '../crud/ConfirmDialog.vue';
+import type { ReportOptions } from './ReportPlanDialog.vue';
+import ReportPlanDialog from './ReportPlanDialog.vue';
 
 const props = defineProps<{
   pageTitle: string;
@@ -193,6 +202,7 @@ const emit = defineEmits<{
   (e: 'delete', planId: number): void;
   (e: 'sendToApprove', planId: number): void;
   (e: 'revertToCreated', planId: number): void;
+  (e: 'report', options: ReportOptions): void;
 }>();
 
 const isDeleteDialogOpen = ref(false);
@@ -226,6 +236,8 @@ const handleApproval = () => {
     emit('revertToCreated', planToSend.value.id);
   }
 };
+
+const isReportDialogOpen = ref(false);
 
 const statusOptions: { value: PlanStatus | 'ALL'; label: string }[] = [
   { value: 'ALL', label: 'Semua' },

@@ -12,12 +12,14 @@
     @delete="handleDelete"
     @send-to-approve="handleApproval($event, 'send')"
     @revert-to-created="handleApproval($event, 'revert')"
+    @report="handleGenerateReport"
   />
 </template>
 
 <script setup lang="ts">
 import { baseUrl } from '@/api/baseUrl';
 import ProductionPlanTable from '@/components/production-plan/ProductionPlanTable.vue';
+import type { ReportOptions } from '@/components/production-plan/ReportPlanDialog.vue';
 import { getToken } from '@/helper/authHelper';
 import type { PaginationMeta, SortParams } from '@/interfaces/getAll.interface';
 import { PlanStatus, type ProductionPlan } from '@/interfaces/productionPlan.interface';
@@ -115,6 +117,52 @@ const handleDelete = async (planId: number) => {
     });
 
     await fetchData();
+  } catch (error: any) {
+    const status = error.response.status;
+
+    if (error.response) {
+      if (status === 401) {
+        console.error('Not authenticated');
+      } else {
+        console.error('Server error');
+      }
+    } else {
+      console.error('Something happened');
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleGenerateReport = async (options: ReportOptions) => {
+  const token = getToken();
+  const url = `${baseUrl}/report/production-plans`;
+
+  const params = new URLSearchParams();
+  if (options.period) {
+    params.append('period', options.period);
+  }
+  if (options.date) {
+    params.append('date', options.date);
+  }
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params,
+      responseType: 'blob',
+    });
+
+    const blob = response.data;
+    const fileURL = URL.createObjectURL(blob);
+
+    window.open(fileURL, '_blank');
+
+    setTimeout(() => {
+      URL.revokeObjectURL(fileURL);
+    }, 100);
   } catch (error: any) {
     const status = error.response.status;
 
