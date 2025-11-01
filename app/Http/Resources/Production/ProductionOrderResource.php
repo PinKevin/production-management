@@ -24,7 +24,8 @@ class ProductionOrderResource extends JsonResource
             'status' => $this->status,
             'deadline' => $this->deadline,
             'createdAt' => $this->created_at,
-            'product' => new ProductResource($this->whenLoaded('product'))
+            'product' => new ProductResource($this->whenLoaded('product')),
+            'productionLogs' => ProductionLogResource::collection($this->whenLoaded('productionLogs'))
         ];
     }
 }

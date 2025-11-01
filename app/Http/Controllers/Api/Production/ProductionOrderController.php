@@ -68,6 +68,8 @@ class ProductionOrderController extends Controller
             abort(403);
         }
 
+        $productionOrder->load('productionLogs.user', 'product');
+
         return ApiResponse::sendResponse(
             'Successfully fetch an order',
             new ProductionOrderResource($productionOrder),
