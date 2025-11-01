@@ -119,7 +119,7 @@
               <Button
                 v-if="datum.status === OrderStatus.WAITING"
                 size="icon"
-                @click="openStatusDialog(datum, 'process')"
+                @click="emit('openDialog', datum, 'process')"
               >
                 <Send class="text-white" />
               </Button>
@@ -128,9 +128,18 @@
                 v-if="datum.status === OrderStatus.IN_PROGRESS"
                 size="icon"
                 variant="destructive"
-                @click="openStatusDialog(datum, 'cancel')"
+                @click="emit('openDialog', datum, 'cancel')"
               >
                 <X class="text-white" />
+              </Button>
+
+              <Button
+                v-if="datum.status === OrderStatus.IN_PROGRESS"
+                size="icon"
+                variant="default"
+                @click="emit('openDialog', datum, 'complete')"
+              >
+                <Check class="text-white" />
               </Button>
             </div>
 
@@ -154,10 +163,21 @@
   </div>
 
   <ConfirmDialog
-    v-model:open="isChangeStatusDialogOpen"
+    :open="isChangeStatusDialogOpen"
+    @update:open="emit('update:changeStatusDialog', $event)"
     title="Konfirmasi Ubah Status"
     :description="`Yakin ingin mengubah status produksi '${orderToChanged?.product.name}'?`"
-    @confirm="handleStatusChange"
+    @confirm="emit('confirmStatusChange')"
+  />
+
+  <CompleteDialog
+    :open="isCompleteStatusDialogOpen"
+    @update:open="emit('update:completeStatusDialog', $event)"
+    title="Selesaikan Order Produksi"
+    :description="`Yakin ingin menyelesaikan produksi '${orderToChanged?.product.name}'?`"
+    @confirm="emit('confirmComplete', $event)"
+    :quantity-actual-error="quantityActualError"
+    :quantity-rejected-error="quantityRejectedError"
   />
 </template>
 
@@ -171,14 +191,16 @@ import type {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '../ui/table';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, Send, X } from 'lucide-vue-next';
+import { Check, ChevronDown, ChevronUp, Send, X } from 'lucide-vue-next';
 import { Button } from '../ui/button';
 import AppPagination from '../AppPagination.vue';
 import { OrderStatus, type ProductionOrder } from '@/interfaces/productionOrder.interface';
 import { formatDate } from '@/helper/formatDateHelper';
 import { orderStatusDisplayMap } from '@/helper/statusDisplayHelper';
-import { ref } from 'vue';
+import { computed } from 'vue';
 import ConfirmDialog from '../crud/ConfirmDialog.vue';
+import CompleteDialog from './CompleteDialog.vue';
+import type { OrderAction } from '@/views/production-order/ProductionOrderPage.vue';
 
 const props = defineProps<{
   pageTitle: string;
@@ -187,35 +209,29 @@ const props = defineProps<{
   statusFilter: OrderStatus | null;
   isLoading: boolean;
   meta: PaginationMeta | null;
+  isChangeStatusDialogOpen: boolean;
+  isCompleteStatusDialogOpen: boolean;
+  orderToChanged: ProductionOrder | null;
+  actionType: OrderAction | null;
+  validationErrors?: {
+    quantity_actual?: string[];
+    quantity_rejected?: string[];
+  } | null;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:sort', params: SortParams): void;
   (e: 'update:filter', status: OrderStatus | null): void;
   (e: 'update:page', page: number | null): void;
-  (e: 'order:process', orderId: number): void;
-  (e: 'order:cancel', orderId: number): void;
+  (e: 'openDialog', order: ProductionOrder, action: OrderAction): void;
+  (e: 'confirmStatusChange'): void;
+  (e: 'confirmComplete', quantities: { quantityActual: number; quantityRejected: number }): void;
+  (e: 'update:changeStatusDialog', value: boolean): void;
+  (e: 'update:completeStatusDialog', value: boolean): void;
 }>();
 
-export type OrderAction = 'process' | 'cancel' | 'complete';
-
-const isChangeStatusDialogOpen = ref(false);
-const orderToChanged = ref<ProductionOrder | null>(null);
-const actionType = ref<OrderAction | null>(null);
-
-const openStatusDialog = (order: ProductionOrder, action: OrderAction) => {
-  orderToChanged.value = order;
-  actionType.value = action;
-  isChangeStatusDialogOpen.value = true;
-};
-
-const handleStatusChange = () => {
-  if (orderToChanged.value && actionType.value === 'process') {
-    emit('order:process', orderToChanged.value.id);
-  } else if (orderToChanged.value && actionType.value === 'cancel') {
-    emit('order:cancel', orderToChanged.value.id);
-  }
-};
+const quantityActualError = computed(() => props.validationErrors?.quantity_actual?.[0] || '');
+const quantityRejectedError = computed(() => props.validationErrors?.quantity_rejected?.[0] || '');
 
 const statusOptions: { value: OrderStatus | 'ALL'; label: string }[] = [
   { value: 'ALL', label: 'Semua' },
