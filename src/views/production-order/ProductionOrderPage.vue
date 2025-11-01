@@ -10,12 +10,15 @@
     @update:filter="statusFilter = $event"
     @update:page="currentPage = $event"
     @order:process="handleStatusChange($event, 'process')"
+    @order:cancel="handleStatusChange($event, 'cancel')"
   />
 </template>
 
 <script setup lang="ts">
 import { baseUrl } from '@/api/baseUrl';
-import ProductionOrderTable from '@/components/production-order/ProductionOrderTable.vue';
+import ProductionOrderTable, {
+  type OrderAction,
+} from '@/components/production-order/ProductionOrderTable.vue';
 import { getToken } from '@/helper/authHelper';
 import type { PaginationMeta, SortParams } from '@/interfaces/getAll.interface';
 import { OrderStatus, type ProductionOrder } from '@/interfaces/productionOrder.interface';
@@ -66,17 +69,14 @@ const fetchData = async () => {
   }
 };
 
-const handleStatusChange = async (
-  orderId: number,
-  action: 'process' | 'completed' | 'cancelled',
-) => {
+const handleStatusChange = async (orderId: number, action: OrderAction) => {
   const token = getToken();
   isLoading.value = true;
 
   let status;
   if (action === 'process') {
     status = OrderStatus.IN_PROGRESS;
-  } else if (action === 'completed') {
+  } else if (action === 'complete') {
     status = OrderStatus.COMPLETED;
   } else {
     status = OrderStatus.CANCELED;

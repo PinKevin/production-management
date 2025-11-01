@@ -119,11 +119,23 @@
               <Button
                 v-if="datum.status === OrderStatus.WAITING"
                 size="icon"
-                @click="openProcessDialog(datum)"
+                @click="openStatusDialog(datum, 'process')"
               >
                 <Send class="text-white" />
               </Button>
+
+              <Button
+                v-if="datum.status === OrderStatus.IN_PROGRESS"
+                size="icon"
+                variant="destructive"
+                @click="openStatusDialog(datum, 'cancel')"
+              >
+                <X class="text-white" />
+              </Button>
             </div>
+
+            <div v-else-if="datum.status === OrderStatus.CANCELED">Produksi sudah dibatalkan</div>
+            <div v-else-if="datum.status === OrderStatus.COMPLETED">Produksi sudah selesai</div>
           </TableCell>
         </TableRow>
       </template>
@@ -142,10 +154,10 @@
   </div>
 
   <ConfirmDialog
-    v-model:open="isProcessDialogOpen"
+    v-model:open="isChangeStatusDialogOpen"
     title="Konfirmasi Ubah Status"
-    :description="`Yakin ingin mengubah status produksi '${orderToProcessed?.product.name}' ke memproses?`"
-    @confirm="handleProcess"
+    :description="`Yakin ingin mengubah status produksi '${orderToChanged?.product.name}'?`"
+    @confirm="handleStatusChange"
   />
 </template>
 
@@ -159,7 +171,7 @@ import type {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableHeader } from '../ui/table';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, Send } from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Send, X } from 'lucide-vue-next';
 import { Button } from '../ui/button';
 import AppPagination from '../AppPagination.vue';
 import { OrderStatus, type ProductionOrder } from '@/interfaces/productionOrder.interface';
@@ -182,19 +194,26 @@ const emit = defineEmits<{
   (e: 'update:filter', status: OrderStatus | null): void;
   (e: 'update:page', page: number | null): void;
   (e: 'order:process', orderId: number): void;
+  (e: 'order:cancel', orderId: number): void;
 }>();
 
-const isProcessDialogOpen = ref(false);
-const orderToProcessed = ref<ProductionOrder | null>(null);
+export type OrderAction = 'process' | 'cancel' | 'complete';
 
-const openProcessDialog = (order: ProductionOrder) => {
-  orderToProcessed.value = order;
-  isProcessDialogOpen.value = true;
+const isChangeStatusDialogOpen = ref(false);
+const orderToChanged = ref<ProductionOrder | null>(null);
+const actionType = ref<OrderAction | null>(null);
+
+const openStatusDialog = (order: ProductionOrder, action: OrderAction) => {
+  orderToChanged.value = order;
+  actionType.value = action;
+  isChangeStatusDialogOpen.value = true;
 };
 
-const handleProcess = () => {
-  if (orderToProcessed.value) {
-    emit('order:process', orderToProcessed.value.id);
+const handleStatusChange = () => {
+  if (orderToChanged.value && actionType.value === 'process') {
+    emit('order:process', orderToChanged.value.id);
+  } else if (orderToChanged.value && actionType.value === 'cancel') {
+    emit('order:cancel', orderToChanged.value.id);
   }
 };
 
